@@ -7,5 +7,5 @@ import (
 
 func main() {
 	groupService := services.GroupService{}
-	lambda.Start(groupService.Subscribe)
+	lambda.Start(groupService.Index)
 }

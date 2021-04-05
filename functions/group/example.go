@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 // Response is of type APIGatewayProxyResponse since we're leveraging the
@@ -39,7 +38,7 @@ func Handler(ctx context.Context) (Response, error) {
 
 	return resp, nil
 }
-
-func main() {
-	lambda.Start(Handler)
-}
+//
+//func main() {
+//	lambda.Start(Handler)
+//}
