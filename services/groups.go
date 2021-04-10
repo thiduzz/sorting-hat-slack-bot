@@ -58,6 +58,16 @@ func (g GroupService) Store(request events.APIGatewayProxyRequest) (events.APIGa
 	return events.APIGatewayProxyResponse{Body: fmt.Sprintf("New group %s created!", group.Title), StatusCode: 200}, nil
 }
 
+func (g GroupService) Destroy(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	params := helpers.DecodeRequest(request.Body)
+	repo := repositories.NewGroupRepository()
+	title := params.Get("text")
+	if err := repo.Destroy(title,params.Get("channel_id")); err != nil {
+		return helpers.NewErrorResponse(err), nil
+	}
+	return events.APIGatewayProxyResponse{Body: fmt.Sprintf("Group sucessfully %s deleted!", title), StatusCode: 200}, nil
+}
+
 func (g GroupService) Subscribe(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	message := fmt.Sprintf(" { \"Message\" : \"Hello %s \" } ", "Slack bot do Thiago subscribing")

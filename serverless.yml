@@ -73,6 +73,12 @@ functions:
       - httpApi:
           path: /groups/store
           method: post
+  groupDestroy:
+    handler: bin/groupDestroy
+    events:
+      - httpApi:
+          path: /groups/destroy
+          method: post
   groupList:
     handler: bin/groupIndex
     events:

@@ -23,6 +23,11 @@ type groupListItem struct{
 	Title string
 }
 
+type GroupOwnershipCondition struct {
+	Title string `json:":val"`
+	ChannelId string `json:":val2"`
+}
+
 func NewGroupRepository() *groupRepository  {
 	sess := session.Must(session.NewSession())
 	return &groupRepository{
@@ -76,4 +81,50 @@ func (g *groupRepository) IndexByChannelId(channelId string) ([]groupListItem, e
 		groups = append(groups, item)
 	}
 	return groups, nil
+}
+
+func (g *groupRepository) FindByNameAndChannel(groupName string, channelId string) (*models.Group, error) {
+	filt := expression.Name("ChannelId").Equal(expression.Value(channelId))
+	filt.And(expression.Name("Title").Equal(expression.Value(groupName)))
+	expr, err := expression.NewBuilder().WithFilter(filt).Build()
+	if err != nil {
+		log.Fatalf("Got error building expression: %s", err)
+	}
+	result, err := g.db.Scan(&dynamodb.ScanInput{
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		TableName:                 aws.String(models.GroupsTableName),
+	})
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Got error calling Scan: %s", err))
+	}
+	if len(result.Items) < 0 {
+		return nil, errors.New("No group with this name was found.")
+	}
+
+	group := models.Group{}
+	firstItem := result.Items[0]
+	err = dynamodbattribute.UnmarshalMap(firstItem, &group)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Got error unmarshalling: %s", err))
+	}
+	return &group, nil
+}
+
+func (g *groupRepository) Destroy(groupName string, channelId string) (error) {
+
+	condition, err := dynamodbattribute.MarshalMap(GroupOwnershipCondition{
+		Title: groupName,
+		ChannelId: channelId,
+	})
+	_, err = g.db.DeleteItem(&dynamodb.DeleteItemInput{
+		TableName:                 aws.String(models.GroupsTableName),
+		ConditionExpression:       aws.String("Title = :val AND ChannelId = :val2"),
+		ExpressionAttributeValues: condition,
+	})
+	if err != nil {
+		return errors.New(fmt.Sprintf("Could not delete the group %s",groupName))
+	}
+	return nil
 }
