@@ -62,7 +62,12 @@ func (g GroupService) Destroy(request events.APIGatewayProxyRequest) (events.API
 	params := helpers.DecodeRequest(request.Body)
 	repo := repositories.NewGroupRepository()
 	title := params.Get("text")
-	if err := repo.Destroy(title,params.Get("channel_id")); err != nil {
+	channel := params.Get("channel_id")
+	group, err := repo.FindByNameAndChannel(title, channel)
+	if err != nil {
+		return helpers.NewErrorResponse(err), nil
+	}
+	if err := repo.Destroy(group); err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
 	return events.APIGatewayProxyResponse{Body: fmt.Sprintf("Group sucessfully %s deleted!", title), StatusCode: 200}, nil

@@ -23,11 +23,6 @@ type groupListItem struct{
 	Title string
 }
 
-type GroupOwnershipCondition struct {
-	Title string `json:":val"`
-	ChannelId string `json:":val2"`
-}
-
 func NewGroupRepository() *groupRepository  {
 	sess := session.Must(session.NewSession())
 	return &groupRepository{
@@ -86,10 +81,7 @@ func (g *groupRepository) IndexByChannelId(channelId string) ([]groupListItem, e
 func (g *groupRepository) FindByNameAndChannel(groupName string, channelId string) (*models.Group, error) {
 	filt := expression.Name("ChannelId").Equal(expression.Value(channelId))
 	filt.And(expression.Name("Title").Equal(expression.Value(groupName)))
-	expr, err := expression.NewBuilder().WithFilter(filt).Build()
-	if err != nil {
-		log.Fatalf("Got error building expression: %s", err)
-	}
+	expr, _ := expression.NewBuilder().WithFilter(filt).Build()
 	result, err := g.db.Scan(&dynamodb.ScanInput{
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
@@ -112,19 +104,24 @@ func (g *groupRepository) FindByNameAndChannel(groupName string, channelId strin
 	return &group, nil
 }
 
-func (g *groupRepository) Destroy(groupName string, channelId string) (error) {
+type GroupOwnershipKey struct {
+	ChannelId string
+	GroupId   string
+}
 
-	condition, err := dynamodbattribute.MarshalMap(GroupOwnershipCondition{
-		Title: groupName,
-		ChannelId: channelId,
+func (g *groupRepository) Destroy(group *models.Group) (error) {
+
+	key, _ := dynamodbattribute.MarshalMap(GroupOwnershipKey{
+		GroupId: group.GroupId,
+		ChannelId:  group.ChannelId,
 	})
-	_, err = g.db.DeleteItem(&dynamodb.DeleteItemInput{
+
+	_, err := g.db.DeleteItem(&dynamodb.DeleteItemInput{
+		Key: key,
 		TableName:                 aws.String(models.GroupsTableName),
-		ConditionExpression:       aws.String("Title = :val AND ChannelId = :val2"),
-		ExpressionAttributeValues: condition,
 	})
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not delete the group %s",groupName))
+		return errors.New(fmt.Sprintf("Could not delete the group %s : %s",group.Title, err.Error()))
 	}
 	return nil
 }
