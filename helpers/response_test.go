@@ -2,6 +2,7 @@ package helpers
 
 import "testing"
 
+
 func TestFormatListBlockResponse(t *testing.T) {
 	type args struct {
 		listToFormat []string

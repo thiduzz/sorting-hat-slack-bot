@@ -1,0 +1,31 @@
+{
+	"title": {
+		"type": "plain_text",
+		"text": "Add Users to {{ .Title}}",
+		"emoji": true
+	},
+	"submit": {
+		"type": "plain_text",
+		"text": "Subscribe",
+		"emoji": true
+	},
+	"type": "modal",
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Select user to add"
+			},
+			"accessory": {
+				"type": "users_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Select a user",
+					"emoji": true
+				},
+				"action_id": "users_select-action"
+			}
+		}
+	]
+}

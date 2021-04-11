@@ -1,38 +1,12 @@
 package services
 
 import (
-	"encoding/base64"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
-	"net/url"
+	"github.com/thiduzz/slack-bot/helpers"
 	"testing"
 )
 
-func generateBaseRequest() map[string] string{
-	return map[string]string{
-		"token": "O8mkcDKXfmIitPp7RXSX4S1U",
-		"team_id": "T01T72BF15Z",
-		"team_domain": "test",
-		"channel_id": "C01T72BFMFV",
-		"channel_name": "general",
-		"user_id": "U01T02LM6DU",
-		"user_name": "test",
-		"command": "sorting-hat-group-create",
-		"text": "Group Test",
-		"api_app_id": "TestingAppId",
-		"response_url": "https://hooks.slack.com/command/blablabla",
-	}
-}
-
-func encodeToBase64URL(request map[string] string) string {
-
-	params := url.Values{}
-	for key, value := range request {
-		params.Add(key,value)
-	}
-	query := params.Encode()
-	return base64.StdEncoding.EncodeToString([]byte(query))
-}
 
 func TestDecodeContentFromBase64(t *testing.T) {
 	service := GroupService{}
@@ -53,9 +27,9 @@ func TestDecodeContentFromBase64(t *testing.T) {
 
 func TestValidationErrorWhenGroupNameIsTooShort(t *testing.T) {
 	service := GroupService{}
-	requestBody := generateBaseRequest()
+	requestBody := helpers.GenerateBaseRequest()
 	requestBody["text"] = "Test"
-	body := encodeToBase64URL(requestBody)
+	body := helpers.EncodeToBase64URL(requestBody)
 	r := events.APIGatewayProxyRequest{
 		Body: body,
 	}
@@ -72,8 +46,8 @@ func TestValidationErrorWhenGroupNameIsTooShort(t *testing.T) {
 
 func TestInsertIntoDatabaseWhenCreatingGroup(t *testing.T) {
 	service := GroupService{}
-	requestBody := generateBaseRequest()
-	body := encodeToBase64URL(requestBody)
+	requestBody := helpers.GenerateBaseRequest()
+	body := helpers.EncodeToBase64URL(requestBody)
 	r := events.APIGatewayProxyRequest{
 		Body: body,
 	}
@@ -87,8 +61,8 @@ func TestInsertIntoDatabaseWhenCreatingGroup(t *testing.T) {
 
 func TestDeleteFromDatabase(t *testing.T) {
 	service := GroupService{}
-	requestBody := generateBaseRequest()
-	body := encodeToBase64URL(requestBody)
+	requestBody := helpers.GenerateBaseRequest()
+	body := helpers.EncodeToBase64URL(requestBody)
 	r := events.APIGatewayProxyRequest{
 		Body: body,
 	}

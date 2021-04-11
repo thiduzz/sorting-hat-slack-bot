@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/google/uuid"
 	"github.com/thiduzz/slack-bot/helpers"
 	"github.com/thiduzz/slack-bot/models"
@@ -11,8 +12,15 @@ import (
 	"time"
 )
 
-type GroupService struct {}
+type GroupService struct {
+	repositories.GroupRepository
+}
 
+func NewGroupService(db *dynamodb.DynamoDB) *GroupService {
+	return &GroupService{
+		GroupRepository: repositories.NewGroupRepository(db),
+	}
+}
 
 func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	params := helpers.DecodeRequest(request.Body)
@@ -21,8 +29,7 @@ func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGa
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	repo := repositories.NewGroupRepository()
-	groups, err := repo.IndexByChannelId(fmt.Sprintf("%v", formRequest["channelId"]))
+	groups, err := g.GroupRepository.IndexByChannelId(fmt.Sprintf("%v", formRequest["channelId"]))
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
@@ -51,8 +58,7 @@ func (g GroupService) Store(request events.APIGatewayProxyRequest) (events.APIGa
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	repo := repositories.NewGroupRepository()
-	if err := repo.Store(group); err != nil {
+	if err := g.GroupRepository.Store(group); err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
 	return events.APIGatewayProxyResponse{Body: fmt.Sprintf("New group %s created!", group.Title), StatusCode: 200}, nil
@@ -60,22 +66,14 @@ func (g GroupService) Store(request events.APIGatewayProxyRequest) (events.APIGa
 
 func (g GroupService) Destroy(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	params := helpers.DecodeRequest(request.Body)
-	repo := repositories.NewGroupRepository()
 	title := params.Get("text")
 	channel := params.Get("channel_id")
-	group, err := repo.FindByNameAndChannel(title, channel)
+	group, err := g.GroupRepository.FindByNameAndChannel(title, channel)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	if err := repo.Destroy(group); err != nil {
+	if err := g.GroupRepository.Destroy(group); err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
 	return events.APIGatewayProxyResponse{Body: fmt.Sprintf("Group sucessfully %s deleted!", title), StatusCode: 200}, nil
-}
-
-func (g GroupService) Subscribe(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
-	message := fmt.Sprintf(" { \"Message\" : \"Hello %s \" } ", "Slack bot do Thiago subscribing")
-
-	return events.APIGatewayProxyResponse{Body: message, StatusCode: 200}, nil
 }

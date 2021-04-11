@@ -11,6 +11,9 @@ import (
 func main() {
 	sess := session.Must(session.NewSession())
 	db := dynamodb.New(sess)
-	groupService := services.GroupService{GroupRepository: repositories.NewGroupRepository(db)}
-	lambda.Start(groupService.Index)
+	membershipService := services.MembershipService{
+		MembershipRepository: repositories.NewMembershipRepository(db),
+		GroupRepository:      repositories.NewGroupRepository(db),
+	}
+	lambda.Start(membershipService.Create)
 }

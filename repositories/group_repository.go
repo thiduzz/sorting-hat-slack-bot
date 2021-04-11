@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
@@ -12,25 +11,35 @@ import (
 	"log"
 )
 
-
-type groupRepository struct {
-	db *dynamodb.DynamoDB
+type GroupRepository interface {
+	Store(group models.Group) error
+	IndexByChannelId(channelId string) ([]GroupListItem, error)
+	FindByNameAndChannel(groupName string, channelId string) (*models.Group, error)
+	Destroy(group *models.Group) error
 }
 
-type groupListItem struct{
+var _ GroupRepository = &groupDynamo{}
+func NewGroupRepository(db *dynamodb.DynamoDB) *groupDynamo {
+	return &groupDynamo{db: db}
+}
+
+type groupDynamo struct {
+	db *dynamodb.DynamoDB
+	BaseRepository
+}
+
+type GroupListItem struct{
 	GroupId string
 	ChannelId string
 	Title string
 }
 
-func NewGroupRepository() *groupRepository  {
-	sess := session.Must(session.NewSession())
-	return &groupRepository{
-		db: dynamodb.New(sess),
-	}
+type GroupOwnershipKey struct {
+	ChannelId string
+	GroupId   string
 }
 
-func (g *groupRepository) Store(group models.Group) error {
+func (g *groupDynamo) Store(group models.Group) error {
 
 	av, err := dynamodbattribute.MarshalMap(group)
 	if err != nil {
@@ -48,7 +57,7 @@ func (g *groupRepository) Store(group models.Group) error {
 	return nil
 }
 
-func (g *groupRepository) IndexByChannelId(channelId string) ([]groupListItem, error) {
+func (g *groupDynamo) IndexByChannelId(channelId string) ([]GroupListItem, error) {
 	filt := expression.Name("ChannelId").Equal(expression.Value(channelId))
 	proj := expression.NamesList(expression.Name("ChannelId"), expression.Name("GroupId"), expression.Name("Title"))
 	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
@@ -65,10 +74,10 @@ func (g *groupRepository) IndexByChannelId(channelId string) ([]groupListItem, e
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Got error calling GetItem: %s", err))
 	}
-	var groups []groupListItem
+	var groups []GroupListItem
 
 	for _, i := range result.Items {
-		item := groupListItem{}
+		item := GroupListItem{}
 		err = dynamodbattribute.UnmarshalMap(i, &item)
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("Got error unmarshalling: %s", err))
@@ -78,10 +87,9 @@ func (g *groupRepository) IndexByChannelId(channelId string) ([]groupListItem, e
 	return groups, nil
 }
 
-func (g *groupRepository) FindByNameAndChannel(groupName string, channelId string) (*models.Group, error) {
-	filt := expression.Name("ChannelId").Equal(expression.Value(channelId))
-	filt.And(expression.Name("Title").Equal(expression.Value(groupName)))
-	expr, _ := expression.NewBuilder().WithFilter(filt).Build()
+func (g *groupDynamo) FindByNameAndChannel(groupName string, channelId string) (*models.Group, error) {
+	filter := expression.Name("ChannelId").Equal(expression.Value(channelId)).And(expression.Name("Title").Equal(expression.Value(groupName)))
+	expr, _ := expression.NewBuilder().WithFilter(filter).Build()
 	result, err := g.db.Scan(&dynamodb.ScanInput{
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
@@ -89,6 +97,7 @@ func (g *groupRepository) FindByNameAndChannel(groupName string, channelId strin
 		TableName:                 aws.String(models.GroupsTableName),
 	})
 	if err != nil {
+		log.Println(fmt.Sprintf("Got error calling Scan: %s", err))
 		return nil, errors.New(fmt.Sprintf("Got error calling Scan: %s", err))
 	}
 	if len(result.Items) < 0 {
@@ -104,17 +113,14 @@ func (g *groupRepository) FindByNameAndChannel(groupName string, channelId strin
 	return &group, nil
 }
 
-type GroupOwnershipKey struct {
-	ChannelId string
-	GroupId   string
-}
 
-func (g *groupRepository) Destroy(group *models.Group) (error) {
+func (g *groupDynamo) Destroy(group *models.Group) (error) {
 
 	key, _ := dynamodbattribute.MarshalMap(GroupOwnershipKey{
 		GroupId: group.GroupId,
 		ChannelId:  group.ChannelId,
 	})
+
 
 	_, err := g.db.DeleteItem(&dynamodb.DeleteItemInput{
 		Key: key,
