@@ -1,24 +1,6 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
-# For full config options, check the docs:
-#    docs.serverless.com
-#
-# Happy Coding!
 org: thizaom
 app: sorting-hat
 service: api
-# app and org for use with dashboard.serverless.com
-#app: your-app-name
-#org: your-org-name
-
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
 frameworkVersion: '2'
 
 provider:
@@ -40,108 +22,62 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:*:*:*"
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
 package:
   patterns:
     - '!./**'
     - ./bin/**
 functions:
-  groupStore:
-    handler: bin/groupStore
-    events:
-      - httpApi:
-          path: /groups/store
-          method: post
+  slackInteractivePayloadTransform:
+    handler: bin/transform
+  groupCreate:
+    handler: bin/groupCreate
   groupDestroy:
     handler: bin/groupDestroy
-    events:
-      - httpApi:
-          path: /groups/destroy
-          method: post
   groupList:
     handler: bin/groupIndex
     events:
       - httpApi:
           path: /groups
           method: post
-  groupSubscribe:
-    handler: bin/groupSubscribe
-    events:
-      - httpApi:
-          path: /groups/subscribe
-          method: post
-
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
-# events:
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - websocket: $connect
-#      - s3: ${env:BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
-#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
-#      - alexaSkill: amzn1.ask.skill.xx-xx-xx-xx
-#      - alexaSmartHome: amzn1.ask.skill.xx-xx-xx-xx
-#      - iot:
-#          sql: "SELECT * FROM 'some_topic'"
-#      - cloudwatchEvent:
-#          event:
-#            source:
-#              - "aws.ec2"
-#            detail-type:
-#              - "EC2 Instance State-change Notification"
-#            detail:
-#              state:
-#                - pending
-#      - cloudwatchLog: '/aws/lambda/groupSubscribe'
-#      - cognitoUserPool:
-#          pool: MyUserPool
-#          trigger: PreSignUp
-#      - alb:
-#          listenerArn: arn:aws:elasticloadbalancing:us-east-1:XXXXXX:listener/app/my-load-balancer/50dc6c495c0c9188/
-#          priority: 1
-#          conditions:
-#            host: example.com
-#            path: /groupSubscribe
-
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+stepFunctions:
+  stateMachines:
+    yourChoiceMachine:
+      type: EXPRESS
+      events:
+        - http:
+            path: /states
+            method: post
+      definition:
+        StartAt: TransformState
+        States:
+          TransformState:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [slackInteractivePayloadTransform, Arn]
+            Next: ChoiceState
+          ChoiceState:
+            Type: Choice
+            Choices:
+              - Variable: "$.action"
+                StringEquals: "createGroup"
+                Next: GroupCreateMatchState
+              - Variable: "$.action"
+                StringEquals: "destroyGroup"
+                Next: GroupDestroyMatchState
+            Default: DefaultState
+          GroupCreateMatchState:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [groupCreate, Arn]
+            End: true
+          GroupDestroyMatchState:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [groupDestroy, Arn]
+            End: true
+          DefaultState:
+            Type: Fail
+            Cause: "No Matches!"
 resources:
   Resources:
     WorkspacesTable:
@@ -211,7 +147,12 @@ resources:
 plugins:
   - serverless-dynamodb-local
   - serverless-offline
+  - serverless-step-functions
+  - serverless-finch
 custom:
+  client:
+    bucketName: sorting-hats-frontend
+    distributionFolder: /frontend/dist
   endpoints:
     dynamodb-url: 'http://localhost:8000'
   dynamodb:

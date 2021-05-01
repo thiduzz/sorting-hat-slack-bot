@@ -1,5 +1,7 @@
 Run: `make` to generate the binary and then `serverless deploy` to deploy
 
+Run: `yarn build` in the frontend folder and `serverless client deploy` to update the frontend
+
 Run local lambda by: `serverless invoke local --function groupCreate`
 
 To generate mocks I am using mockery codegen CLI: 

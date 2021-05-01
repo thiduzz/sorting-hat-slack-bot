@@ -1,0 +1,7 @@
+POST https://8k5mi0fh75.execute-api.eu-central-1.amazonaws.com/states
+Content-Type: application/json
+
+{}
+
+###
+
