@@ -9,16 +9,19 @@ import (
 	"github.com/thiduzz/slack-bot/helpers"
 	"github.com/thiduzz/slack-bot/models"
 	"github.com/thiduzz/slack-bot/repositories"
+	"io/fs"
 	"time"
 )
 
 type GroupService struct {
 	repositories.GroupRepository
+	fs fs.FS
 }
 
-func NewGroupService(db *dynamodb.DynamoDB) *GroupService {
+func NewGroupService(db *dynamodb.DynamoDB, filesystem fs.FS) *GroupService {
 	return &GroupService{
 		GroupRepository: repositories.NewGroupRepository(db),
+		fs: filesystem,
 	}
 }
 
@@ -33,7 +36,7 @@ func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGa
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	formattedResponse, err := helpers.FormatListBlockResponse(groups)
+	formattedResponse, err := helpers.FormatListBlockResponse(g.fs, groups)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}

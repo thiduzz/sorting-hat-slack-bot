@@ -2,17 +2,19 @@ package helpers
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/thiduzz/slack-bot/repositories"
+	"io/fs"
 	"text/template"
 )
 
-//FormatListBlockResponse
-func FormatListBlockResponse(groups []repositories.GroupListItem) (string, error) {
+
+func FormatListBlockResponse(fs fs.FS, groups []repositories.GroupListItem) (string, error) {
 
 	var err error
-	t, err := template.ParseFiles("../templates/groups_list.tmpl")
+	t, err := template.ParseFS(fs, "templates/list.tmpl")
 	if err != nil {
 		return "", err
 	}

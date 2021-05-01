@@ -65,7 +65,6 @@ package:
   patterns:
     - '!./**'
     - ./bin/**
-
 functions:
   groupStore:
     handler: bin/groupStore

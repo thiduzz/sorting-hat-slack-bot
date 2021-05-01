@@ -7,6 +7,7 @@ import (
 	"github.com/thiduzz/slack-bot/helpers"
 	"github.com/thiduzz/slack-bot/mocks"
 	"github.com/thiduzz/slack-bot/repositories"
+	"os"
 	"testing"
 )
 
@@ -77,9 +78,10 @@ func TestListGroupsFromDatabase(t *testing.T) {
 
 
 	groupRepositoryMock.On("IndexByContextReference", fmt.Sprintf("%s:%s", requestBody["team_id"], requestBody["channel_id"])).Return(groups, nil).Once()
-
+	filesystem := os.DirFS("../functions/group")
 	service := GroupService{
 		GroupRepository: groupRepositoryMock,
+		fs: filesystem,
 	}
 	r := events.APIGatewayProxyRequest{
 		Body: body,
