@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "sorting-hats"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1cphaketr55uh"
+s3_prefix = "sorting-hats"
+region = "eu-central-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"

@@ -1,7 +1,9 @@
-POST https://8k5mi0fh75.execute-api.eu-central-1.amazonaws.com/states
+POST https://heiy91n3th.execute-api.eu-central-1.amazonaws.com/state
 Content-Type: application/json
 
-{}
+{
+"payload": "test"
+}
 
 ###
 

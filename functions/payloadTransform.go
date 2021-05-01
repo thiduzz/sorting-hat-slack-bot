@@ -12,7 +12,6 @@ import (
 type Event struct {
 	Payload string `json:"payload"`
 	Action string `json:"action"`
-	TaskToken string `json:"taskToken"`
 }
 
 // HandleRequest handles the incomming StepFunction request
@@ -23,7 +22,6 @@ func HandleRequest(e interface{}) (Event, error) {
 	return Event{
 		buf.String(),
 		"createGroup",
-			"taskTokenExampleThiago",
 	}, nil
 }
 
