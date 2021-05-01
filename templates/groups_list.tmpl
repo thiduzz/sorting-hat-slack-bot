@@ -1,0 +1,63 @@
+{
+	"blocks": [
+		{
+			"type": "divider"
+		},
+
+		{{ range . }}
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "{{ .Title}}"
+			},
+			"accessory": {
+				"type": "overflow",
+				"options": [
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Manage",
+							"emoji": true
+						},
+						"value": "manage-{{ .GroupId }}"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Inactivate",
+							"emoji": true
+						},
+						"value": "inactivate-{{ .GroupId }}"
+					},
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Delete",
+							"emoji": true
+						},
+						"value": "delete-{{ .GroupId }}"
+					}
+				],
+				"action_id": "overflow-action"
+			}
+		},
+		{{end}}
+		{
+			"type": "divider"
+		},
+		{
+			"dispatch_action": true,
+			"type": "input",
+			"element": {
+				"type": "plain_text_input",
+				"action_id": "new_group_title-action"
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "Create new group",
+				"emoji": true
+			}
+		}
+	]
+}

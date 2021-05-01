@@ -1,9 +1,12 @@
 package services
 
 import (
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/thiduzz/slack-bot/helpers"
+	"github.com/thiduzz/slack-bot/mocks"
+	"github.com/thiduzz/slack-bot/repositories"
 	"testing"
 )
 
@@ -55,6 +58,36 @@ func TestInsertIntoDatabaseWhenCreatingGroup(t *testing.T) {
 	// assert for not nil (good when you expect something)
 	if assert.Nil(t, err) {
 		assert.JSONEq(t, `{"response_type":"ephemeral","text":"Group name should be at least 5 character long"}`, res.Body)
+	}
+}
+
+
+func TestListGroupsFromDatabase(t *testing.T) {
+
+	requestBody := helpers.GenerateBaseRequest()
+	body := helpers.EncodeToBase64URL(requestBody)
+	groupRepositoryMock := &mocks.GroupRepository{}
+	var groups []repositories.GroupListItem
+
+	groups = append(groups, repositories.GroupListItem{
+		GroupId:   "123123",
+		ChannelId: requestBody["channel_id"],
+		Title:     "Test Title",
+	})
+
+
+	groupRepositoryMock.On("IndexByContextReference", fmt.Sprintf("%s:%s", requestBody["team_id"], requestBody["channel_id"])).Return(groups, nil).Once()
+
+	service := GroupService{
+		GroupRepository: groupRepositoryMock,
+	}
+	r := events.APIGatewayProxyRequest{
+		Body: body,
+	}
+	res, err := service.Index(r)
+	// assert for not nil (good when you expect something)
+	if assert.Nil(t, err) {
+		assert.Contains(t, res.Body,  "\"text\": \"Test Title\"")
 	}
 }
 

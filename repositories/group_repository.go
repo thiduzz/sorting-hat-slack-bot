@@ -13,7 +13,7 @@ import (
 
 type GroupRepository interface {
 	Store(group models.Group) error
-	IndexByChannelId(channelId string) ([]GroupListItem, error)
+	IndexByContextReference(channelId string) ([]GroupListItem, error)
 	FindByNameAndChannel(groupName string, channelId string) (*models.Group, error)
 	Destroy(group *models.Group) error
 }
@@ -57,10 +57,9 @@ func (g *groupDynamo) Store(group models.Group) error {
 	return nil
 }
 
-func (g *groupDynamo) IndexByChannelId(channelId string) ([]GroupListItem, error) {
-	filt := expression.Name("ChannelId").Equal(expression.Value(channelId))
-	proj := expression.NamesList(expression.Name("ChannelId"), expression.Name("GroupId"), expression.Name("Title"))
-	expr, err := expression.NewBuilder().WithFilter(filt).WithProjection(proj).Build()
+func (g *groupDynamo) IndexByContextReference(contextReference string) ([]GroupListItem, error) {
+	filt := expression.Name("ContextReference").Equal(expression.Value(contextReference))
+	expr, err := expression.NewBuilder().WithFilter(filt).Build()
 	if err != nil {
 		log.Fatalf("Got error building expression: %s", err)
 	}
@@ -68,7 +67,6 @@ func (g *groupDynamo) IndexByChannelId(channelId string) ([]GroupListItem, error
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
-		ProjectionExpression:      expr.Projection(),
 		TableName:                 aws.String(models.GroupsTableName),
 	})
 	if err != nil {

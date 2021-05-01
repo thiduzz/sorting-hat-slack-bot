@@ -24,20 +24,20 @@ func NewGroupService(db *dynamodb.DynamoDB) *GroupService {
 
 func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	params := helpers.DecodeRequest(request.Body)
-	formRequest := map[string]interface{}{"channelId": params.Get("channel_id")}
-	_, err := govalidator.ValidateMap(formRequest, map[string]interface{}{"channelId":"required,alphanum"})
+	formRequest := map[string]interface{}{"channelId": params.Get("channel_id"), "workspaceId": params.Get("team_id")}
+	_, err := govalidator.ValidateMap(formRequest, map[string]interface{}{"channelId":"required,alphanum", "workspaceId": "required,alphanum"})
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	groups, err := g.GroupRepository.IndexByChannelId(fmt.Sprintf("%v", formRequest["channelId"]))
+	groups, err := g.GroupRepository.IndexByContextReference(fmt.Sprintf("%s:%s", formRequest["workspaceId"],formRequest["channelId"]))
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	var groupTitles []string
-	for _, item := range groups {
-		groupTitles = append(groupTitles, item.Title)
+	formattedResponse, err := helpers.FormatListBlockResponse(groups)
+	if err != nil {
+		return helpers.NewErrorResponse(err), nil
 	}
-	return events.APIGatewayProxyResponse{Body: helpers.FormatListBlockResponse(groupTitles), StatusCode: 200,
+	return events.APIGatewayProxyResponse{Body: formattedResponse, StatusCode: 200,
 		Headers: map[string]string{
 			"Content-Type":           "application/json",
 		}}, nil

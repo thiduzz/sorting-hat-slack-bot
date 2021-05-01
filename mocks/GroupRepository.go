@@ -51,12 +51,12 @@ func (_m *GroupRepository) FindByNameAndChannel(groupName string, channelId stri
 }
 
 // IndexByChannelId provides a mock function with given fields: channelId
-func (_m *GroupRepository) IndexByChannelId(channelId string) ([]repositories.GroupListItem, error) {
-	ret := _m.Called(channelId)
+func (_m *GroupRepository) IndexByContextReference(contextReference string) ([]repositories.GroupListItem, error) {
+	ret := _m.Called(contextReference)
 
 	var r0 []repositories.GroupListItem
 	if rf, ok := ret.Get(0).(func(string) []repositories.GroupListItem); ok {
-		r0 = rf(channelId)
+		r0 = rf(contextReference)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]repositories.GroupListItem)
@@ -65,7 +65,7 @@ func (_m *GroupRepository) IndexByChannelId(channelId string) ([]repositories.Gr
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(channelId)
+		r1 = rf(contextReference)
 	} else {
 		r1 = ret.Error(1)
 	}

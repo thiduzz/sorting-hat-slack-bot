@@ -25,8 +25,8 @@ func GenerateBaseRequest() map[string] string{
 		"channel_name": "general",
 		"user_id": "U01T02LM6DU",
 		"user_name": "test",
-		"command": "sorting-hat-group-create",
-		"text": "Group Test",
+		"command": "hats",
+		"text": "Whatever",
 		"api_app_id": "TestingAppId",
 		"response_url": "https://hooks.slack.com/command/blablabla",
 	}

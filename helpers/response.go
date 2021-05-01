@@ -3,38 +3,26 @@ package helpers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/thiduzz/slack-bot/repositories"
+	"text/template"
 )
 
 //FormatListBlockResponse
-func FormatListBlockResponse(listToFormat []string) string {
-	if len(listToFormat) <= 0 {
-		return ""
+func FormatListBlockResponse(groups []repositories.GroupListItem) (string, error) {
+
+	var err error
+	t, err := template.ParseFiles("../templates/groups_list.tmpl")
+	if err != nil {
+		return "", err
 	}
-	var stringList string
-	for _, item := range listToFormat {
-		if listToFormat[len(listToFormat)-1] != item {
-			stringList += fmt.Sprintf("• %s\n", item)
-		}else{
-			stringList += fmt.Sprintf("• %s", item)
-		}
+
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, groups); err != nil {
+		return "", err
 	}
-	body, _ := json.Marshal(map[string]interface{}{
-		"blocks": []interface{}{
-			struct{
-				TypeName string `json:"type"`
-				Text map[string]string `json:"text"`
-			}{
-					TypeName: "section",
-					Text: map[string]string{
-						"type": "mrkdwn",
-						"text": stringList,
-					},
-			},
-		},
-	})
-	return string(body)
+
+	return tpl.String(), nil
 }
 
 func NewErrorResponse(err error) events.APIGatewayProxyResponse {
