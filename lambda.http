@@ -1,5 +1,6 @@
 POST https://heiy91n3th.execute-api.eu-central-1.amazonaws.com/state
 Content-Type: application/json
+Accept: application/json
 
 {
 "payload": "test"

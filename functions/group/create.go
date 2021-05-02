@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -19,11 +18,11 @@ type OutEvent struct {
 }
 
 // HandleRequest handles the incomming StepFunction request
-func HandleRequest(e InEvent) (events.APIGatewayProxyResponse, error) {
-	return events.APIGatewayProxyResponse{Body: e.Payload, StatusCode: 200,
-		Headers: map[string]string{
-			"Content-Type":           "application/json",
-		}}, nil
+func HandleRequest(e InEvent) (OutEvent, error) {
+	return OutEvent{
+		Payload: e.Payload,
+		Status:  200,
+	}, nil
 }
 
 func main() {
