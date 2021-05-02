@@ -10,8 +10,12 @@ import (
 // Event defines your lambda input and output data structure,
 // and of course you can have different input and output data structure
 type Event struct {
-	Payload string `json:"payload"`
+	Request Request `json:"request"`
 	Action string `json:"action"`
+}
+
+type Request struct {
+	Body interface{} `json:"body"`
 }
 
 // HandleRequest handles the incomming StepFunction request
@@ -19,8 +23,9 @@ func HandleRequest(e interface{}) (Event, error) {
 	var buf bytes.Buffer
 	body, _ := json.Marshal(e)
 	json.HTMLEscape(&buf, body)
+	request := Request{Body: buf.String()}
 	return Event{
-		buf.String(),
+		request,
 		"createGroup",
 	}, nil
 }

@@ -4,10 +4,27 @@ Transform: AWS::Serverless-2016-10-31
 Resources:
   SAMLogs:
     Type: AWS::Logs::LogGroup
+  AccessLogs:
+    Type: AWS::Logs::LogGroup
 
   SortingHatsApi:
     Type: AWS::Serverless::HttpApi
     Properties:
+      AccessLogSettings:
+        Format: >
+          {
+          "httpMethod": "$context.httpMethod",
+          "routeKey": "$context.routeKey",
+          "requestId": "$context.requestId",
+          "ip": "$context.identity.sourceIp",
+          "requestTime": "$context.requestTime",
+          "status": "$context.status",
+          "protocol": "$context.protocol",
+          "responseLength": "$context.responseLength",
+          "integrationError": "$context.integrationErrorMessage",
+          "body":"$input.body"
+          }
+        DestinationArn: !GetAtt AccessLogs.Arn
       FailOnWarnings: True
       DefinitionBody:
         openapi: 3.0.1

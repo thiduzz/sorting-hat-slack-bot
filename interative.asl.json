@@ -26,10 +26,8 @@
     "Show Create Group": {
       "Type": "Task",
       "Resource": "${CreateGroupFunctionArn}",
-      "ResultSelector": {
-        "data.$": "$.output"
-      },
-      "ResultPath": "$.response",
+      "InputPath": "$.request",
+      "OutputPath": "$.response",
       "End": true
     },
     "Delete Group": {

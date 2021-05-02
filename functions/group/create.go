@@ -5,22 +5,21 @@ import (
 )
 
 
-// InEvent defines your lambda input data structure,
-type InEvent struct {
-	Payload string `json:"payload"`
-	Action  string    `json:"action"`
+// Request defines your lambda input data structure,
+type Request struct {
+	Body string `json:"body"`
 }
 
 // OutEvent defines your lambda output data structure,
 type OutEvent struct {
-	Payload string `json:"payload"`
+	Response string `json:"response"`
 	Status  int    `json:"status"`
 }
 
 // HandleRequest handles the incomming StepFunction request
-func HandleRequest(e InEvent) (OutEvent, error) {
+func HandleRequest(e Request) (OutEvent, error) {
 	return OutEvent{
-		Payload: e.Payload,
+		Response: e.Body,
 		Status:  200,
 	}, nil
 }
