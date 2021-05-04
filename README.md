@@ -113,107 +113,107 @@ A post is performed with all the data of the form and the group_id, in the datab
 
 ```json
 {
-    "type": "view_submission",
-    "team": {
-        "id": "T01T72BF15Z",
-        "domain": "thiagopersona-ru28436"
-    },
-    "user": {
-        "id": "U01T02LM6DU",
-        "username": "thiduzz14",
-        "name": "thiduzz14",
-        "team_id": "T01T72BF15Z"
-    },
-    "api_app_id": "A01T3P94H6H",
-    "token": "O8mkcDKXfmIitPp7RXSX4S1U",
-    "trigger_id": "2012555251431.1925079511203.372c1a4a2a68240c67089ba336255688",
-    "view": {
-        "id": "V020CGB18FR",
-        "team_id": "T01T72BF15Z",
-        "type": "modal",
-        "blocks": [
-            {
-                "type": "divider",
-                "block_id": "unoS"
-            },
-            {
-                "type": "section",
-                "block_id": "CpM",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "No current groups",
-                    "verbatim": false
-                }
-            },
-            {
-                "type": "divider",
-                "block_id": "VrHZ"
-            },
-            {
-                "type": "input",
-                "block_id": "inputGroupCreate",
-                "label": {
-                    "type": "plain_text",
-                    "text": "New group name",
-                    "emoji": true
-                },
-                "optional": false,
-                "dispatch_action": true,
-                "element": {
-                    "type": "plain_text_input",
-                    "action_id": "TextInputCreateGroup",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "Write the name....",
-                        "emoji": true
-                    },
-                    "dispatch_action_config": {
-                        "trigger_actions_on": [
-                            "on_enter_pressed"
-                        ]
-                    }
-                }
-            }
-        ],
-        "private_metadata": "TestingPrivateMetaData",
-        "callback_id": "",
-        "state": {
-            "values": {
-                "inputGroupCreate": {
-                    "TextInputCreateGroup": {
-                        "type": "plain_text_input",
-                        "value": "test"
-                    }
-                }
-            }
+  "type": "view_submission",
+  "team": {
+    "id": "T01T72BF15Z",
+    "domain": "thiagopersona-ru28436"
+  },
+  "user": {
+    "id": "U01T02LM6DU",
+    "username": "thiduzz14",
+    "name": "thiduzz14",
+    "team_id": "T01T72BF15Z"
+  },
+  "api_app_id": "A01T3P94H6H",
+  "token": "O8mkcDKXfmIitPp7RXSX4S1U",
+  "trigger_id": "2040069532737.1925079511203.c298f54601507aa6f682a2bc3cbb689f",
+  "view": {
+    "id": "V020CL1H007",
+    "team_id": "T01T72BF15Z",
+    "type": "modal",
+    "blocks": [
+      {
+        "type": "divider",
+        "block_id": "DRp"
+      },
+      {
+        "type": "section",
+        "block_id": "vnS",
+        "text": {
+          "type": "mrkdwn",
+          "text": "No current groups",
+          "verbatim": false
+        }
+      },
+      {
+        "type": "divider",
+        "block_id": "sXnt"
+      },
+      {
+        "type": "input",
+        "block_id": "inputGroupCreate",
+        "label": {
+          "type": "plain_text",
+          "text": "New group name",
+          "emoji": true
         },
-        "hash": "1620110512.C0vHSBuL",
-        "title": {
+        "optional": false,
+        "dispatch_action": true,
+        "element": {
+          "type": "plain_text_input",
+          "action_id": "TextInputCreateGroup",
+          "placeholder": {
             "type": "plain_text",
-            "text": "Channel Groups",
+            "text": "Write the name....",
             "emoji": true
-        },
-        "clear_on_close": false,
-        "notify_on_close": false,
-        "close": {
-            "type": "plain_text",
-            "text": "Close",
-            "emoji": true
-        },
-        "submit": {
-            "type": "plain_text",
-            "text": "Submit",
-            "emoji": true
-        },
-        "previous_view_id": null,
-        "root_view_id": "V020CGB18FR",
-        "app_id": "A01T3P94H6H",
-        "external_id": "",
-        "app_installed_team_id": "T01T72BF15Z",
-        "bot_id": "B01TWLT7MA4"
+          },
+          "dispatch_action_config": {
+            "trigger_actions_on": [
+              "on_enter_pressed"
+            ]
+          }
+        }
+      }
+    ],
+    "private_metadata": "T01T72BF15Z:C01T72BFMFV",
+    "callback_id": "CreateGroup",
+    "state": {
+      "values": {
+        "inputGroupCreate": {
+          "TextInputCreateGroup": {
+            "type": "plain_text_input",
+            "value": "sadsad"
+          }
+        }
+      }
     },
-    "response_urls": [],
-    "is_enterprise_install": false,
-    "enterprise": null
+    "hash": "1620113594.9E7VbXRE",
+    "title": {
+      "type": "plain_text",
+      "text": "Channel Groups",
+      "emoji": true
+    },
+    "clear_on_close": false,
+    "notify_on_close": false,
+    "close": {
+      "type": "plain_text",
+      "text": "Close",
+      "emoji": true
+    },
+    "submit": {
+      "type": "plain_text",
+      "text": "Submit",
+      "emoji": true
+    },
+    "previous_view_id": null,
+    "root_view_id": "V020CL1H007",
+    "app_id": "A01T3P94H6H",
+    "external_id": "",
+    "app_installed_team_id": "T01T72BF15Z",
+    "bot_id": "B01TWLT7MA4"
+  },
+  "response_urls": [],
+  "is_enterprise_install": false,
+  "enterprise": null
 }
 ```
