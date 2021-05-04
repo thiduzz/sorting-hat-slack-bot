@@ -12,7 +12,6 @@ import (
 	"testing"
 )
 
-
 func TestDecodeContentFromBase64(t *testing.T) {
 	service := GroupService{}
 	r := events.APIGatewayProxyRequest{
@@ -28,7 +27,6 @@ func TestDecodeContentFromBase64(t *testing.T) {
 
 	}
 }
-
 
 func TestValidationErrorWhenGroupNameIsTooShort(t *testing.T) {
 	service := GroupService{}
@@ -47,8 +45,6 @@ func TestValidationErrorWhenGroupNameIsTooShort(t *testing.T) {
 	}
 }
 
-
-
 func TestInsertIntoDatabaseWhenCreatingGroup(t *testing.T) {
 	service := GroupService{}
 	requestBody := helpers.GenerateBaseRequest()
@@ -62,7 +58,6 @@ func TestInsertIntoDatabaseWhenCreatingGroup(t *testing.T) {
 		assert.JSONEq(t, `{"response_type":"ephemeral","text":"Group name should be at least 5 character long"}`, res.Body)
 	}
 }
-
 
 func TestListGroupsFromDatabase(t *testing.T) {
 	godotenv.Load("../.env")
@@ -78,12 +73,11 @@ func TestListGroupsFromDatabase(t *testing.T) {
 		Title:     "Test Title",
 	})
 
-
 	groupRepositoryMock.On("IndexByContextReference", fmt.Sprintf("%s:%s", requestBody["team_id"], requestBody["channel_id"])).Return(groups, nil).Once()
 	slack := NewSlackService(os.Getenv("SLACK_ACCESS_TOKEN"))
 	service := GroupService{
 		GroupRepository: groupRepositoryMock,
-		slack: slack,
+		slack:           slack,
 	}
 	r := events.APIGatewayProxyRequest{
 		Body: body,
@@ -91,10 +85,9 @@ func TestListGroupsFromDatabase(t *testing.T) {
 	res, err := service.Index(r)
 	// assert for not nil (good when you expect something)
 	if assert.Nil(t, err) {
-		assert.Contains(t, res.Body,  "\"text\": \"Test Title\"")
+		assert.Contains(t, res.Body, "\"text\": \"Test Title\"")
 	}
 }
-
 
 func TestDeleteFromDatabase(t *testing.T) {
 	service := GroupService{}

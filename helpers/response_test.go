@@ -2,7 +2,6 @@ package helpers
 
 import "testing"
 
-
 func TestFormatListBlockResponse(t *testing.T) {
 	type args struct {
 		listToFormat []string
@@ -13,7 +12,7 @@ func TestFormatListBlockResponse(t *testing.T) {
 		want string
 	}{
 		{"Send empty", args{listToFormat: []string{}}, ""},
-		{"Send with strings", args{listToFormat: []string{"test1","test2"}}, `{"blocks":[{"type":"section","text":{"text":"• test1\n• test2","type":"mrkdwn"}}]}`},
+		{"Send with strings", args{listToFormat: []string{"test1", "test2"}}, `{"blocks":[{"type":"section","text":{"text":"• test1\n• test2","type":"mrkdwn"}}]}`},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

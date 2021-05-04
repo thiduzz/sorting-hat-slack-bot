@@ -11,14 +11,14 @@ func NewErrorResponse(err error) events.APIGatewayProxyResponse {
 	var buf bytes.Buffer
 	body, _ := json.Marshal(map[string]interface{}{
 		"response_type": "ephemeral",
-		"text": err.Error(),
+		"text":          err.Error(),
 	})
 	json.HTMLEscape(&buf, body)
 	return events.APIGatewayProxyResponse{
-		Body: buf.String(),
+		Body:            buf.String(),
 		IsBase64Encoded: false,
-		StatusCode: 200,
+		StatusCode:      200,
 		Headers: map[string]string{
-			"Content-Type":           "application/json",
+			"Content-Type": "application/json",
 		}}
 }

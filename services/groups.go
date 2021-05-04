@@ -20,18 +20,18 @@ type GroupService struct {
 func NewGroupService(db *dynamodb.DynamoDB, slackService *SlackService) *GroupService {
 	return &GroupService{
 		GroupRepository: repositories.NewGroupRepository(db),
-		slack: slackService,
+		slack:           slackService,
 	}
 }
 
 func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	params := helpers.DecodeRequest(request.Body)
 	formRequest := map[string]interface{}{"channelId": params.Get("channel_id"), "workspaceId": params.Get("team_id")}
-	_, err := govalidator.ValidateMap(formRequest, map[string]interface{}{"channelId":"required,alphanum", "workspaceId": "required,alphanum"})
+	_, err := govalidator.ValidateMap(formRequest, map[string]interface{}{"channelId": "required,alphanum", "workspaceId": "required,alphanum"})
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	referenceId := fmt.Sprintf("%s:%s", formRequest["workspaceId"],formRequest["channelId"])
+	referenceId := fmt.Sprintf("%s:%s", formRequest["workspaceId"], formRequest["channelId"])
 	groups, err := g.GroupRepository.IndexByContextReference(referenceId)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
@@ -42,20 +42,20 @@ func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGa
 	}
 	return events.APIGatewayProxyResponse{Body: "", StatusCode: 200,
 		Headers: map[string]string{
-			"Content-Type":           "application/json",
+			"Content-Type": "application/json",
 		}}, nil
 }
 
 func (g GroupService) Store(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	params := helpers.DecodeRequest(request.Body)
 	group := models.Group{
-		GroupId:		uuid.NewString(),
-		ChannelId: 		params.Get("channel_id"),
-		ChannelName: 	params.Get("channel_name"),
-		CreatorId:      params.Get("user_id"),
-		Title:        	params.Get("text"),
-		WorkspaceId:	params.Get("team_id"),
-		CreatedAt:  	time.Now().UTC().Format(time.RFC3339),
+		GroupId:     uuid.NewString(),
+		ChannelId:   params.Get("channel_id"),
+		ChannelName: params.Get("channel_name"),
+		CreatorId:   params.Get("user_id"),
+		Title:       params.Get("text"),
+		WorkspaceId: params.Get("team_id"),
+		CreatedAt:   time.Now().UTC().Format(time.RFC3339),
 	}
 	_, err := govalidator.ValidateStruct(group)
 	if err != nil {

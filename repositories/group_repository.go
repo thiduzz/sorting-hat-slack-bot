@@ -19,6 +19,7 @@ type GroupRepository interface {
 }
 
 var _ GroupRepository = &groupDynamo{}
+
 func NewGroupRepository(db *dynamodb.DynamoDB) *groupDynamo {
 	return &groupDynamo{db: db}
 }
@@ -28,10 +29,10 @@ type groupDynamo struct {
 	BaseRepository
 }
 
-type GroupListItem struct{
-	GroupId string
+type GroupListItem struct {
+	GroupId   string
 	ChannelId string
-	Title string
+	Title     string
 }
 
 type GroupOwnershipKey struct {
@@ -111,21 +112,19 @@ func (g *groupDynamo) FindByNameAndChannel(groupName string, channelId string) (
 	return &group, nil
 }
 
-
-func (g *groupDynamo) Destroy(group *models.Group) (error) {
+func (g *groupDynamo) Destroy(group *models.Group) error {
 
 	key, _ := dynamodbattribute.MarshalMap(GroupOwnershipKey{
-		GroupId: group.GroupId,
-		ChannelId:  group.ChannelId,
+		GroupId:   group.GroupId,
+		ChannelId: group.ChannelId,
 	})
-
 
 	_, err := g.db.DeleteItem(&dynamodb.DeleteItemInput{
-		Key: key,
-		TableName:                 aws.String(models.GroupsTableName),
+		Key:       key,
+		TableName: aws.String(models.GroupsTableName),
 	})
 	if err != nil {
-		return errors.New(fmt.Sprintf("Could not delete the group %s : %s",group.Title, err.Error()))
+		return errors.New(fmt.Sprintf("Could not delete the group %s : %s", group.Title, err.Error()))
 	}
 	return nil
 }

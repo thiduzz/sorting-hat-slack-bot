@@ -14,7 +14,7 @@ func TestModalGeneration(t *testing.T) {
 	groupRepositoryMock.On("FindByNameAndChannel", requestBody["text"], requestBody["channel_id"]).Return(&testGroup, nil).Once()
 	service := MembershipService{
 		MembershipRepository: &mocks.MembershipRepository{},
-		GroupRepository: groupRepositoryMock,
+		GroupRepository:      groupRepositoryMock,
 	}
 	body := helpers.EncodeToBase64URL(requestBody)
 	r := events.APIGatewayProxyRequest{

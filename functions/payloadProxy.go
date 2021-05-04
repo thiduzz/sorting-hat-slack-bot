@@ -19,6 +19,6 @@ func Index(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespons
 	log.Println(params)
 	return events.APIGatewayProxyResponse{Body: "Ok Thiago!", StatusCode: 200,
 		Headers: map[string]string{
-			"Content-Type":           "application/json",
+			"Content-Type": "application/json",
 		}}, nil
 }

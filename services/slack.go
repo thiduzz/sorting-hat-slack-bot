@@ -19,10 +19,10 @@ func NewSlackService(accessToken string) *SlackService {
 func (sl SlackService) showGroupsListDialog(triggerId string, referenceId string, groups []repositories.GroupListItem) error {
 
 	var groupsBlock *slack.SectionBlock
-	if len(groups) <= 0{
-		groupsBlock = slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "No current groups", false, false), nil,nil)
-	}else{
-		groupsBlock = slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "With some groups", false, false), nil,nil)
+	if len(groups) <= 0 {
+		groupsBlock = slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "No current groups", false, false), nil, nil)
+	} else {
+		groupsBlock = slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "With some groups", false, false), nil, nil)
 	}
 	var modalRequest slack.ModalViewRequest
 	modalRequest.Type = slack.ViewType("modal")
@@ -40,7 +40,7 @@ func (sl SlackService) showGroupsListDialog(triggerId string, referenceId string
 				Type:           "input",
 				BlockID:        "inputGroupCreate",
 				Label:          slack.NewTextBlockObject("plain_text", "New group name", false, false),
-				Element:        slack.NewPlainTextInputBlockElement(slack.NewTextBlockObject("plain_text", "Write the name....", false, false),"TextInputCreateGroup"),
+				Element:        slack.NewPlainTextInputBlockElement(slack.NewTextBlockObject("plain_text", "Write the name....", false, false), "TextInputCreateGroup"),
 				Hint:           nil,
 				Optional:       false,
 				DispatchAction: true,
@@ -51,9 +51,9 @@ func (sl SlackService) showGroupsListDialog(triggerId string, referenceId string
 	return sl.showDialog(triggerId, modalRequest)
 }
 
-func (sl SlackService) showDialog(triggerId string, modal slack.ModalViewRequest) error  {
+func (sl SlackService) showDialog(triggerId string, modal slack.ModalViewRequest) error {
 	body, err := json.Marshal(modal)
-	if err != nil{
+	if err != nil {
 		log.Println(err)
 	}
 	log.Println(string(body))

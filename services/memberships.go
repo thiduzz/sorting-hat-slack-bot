@@ -34,10 +34,10 @@ func (g MembershipService) Create(request events.APIGatewayProxyRequest) (events
 	body, _ := json.Marshal(tpl.String())
 	json.HTMLEscape(&buf, body)
 	return events.APIGatewayProxyResponse{
-		Body: buf.String(),
+		Body:            buf.String(),
 		IsBase64Encoded: false,
-		StatusCode: 200,
+		StatusCode:      200,
 		Headers: map[string]string{
-			"Content-Type":           "application/json",
-		}},nil
+			"Content-Type": "application/json",
+		}}, nil
 }

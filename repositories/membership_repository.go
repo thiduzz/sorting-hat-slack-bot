@@ -22,4 +22,3 @@ type membershipDynamo struct {
 func (m membershipDynamo) Subscribe(userId string) error {
 	panic("implement me")
 }
-
