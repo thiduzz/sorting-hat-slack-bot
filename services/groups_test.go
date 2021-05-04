@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"github.com/thiduzz/slack-bot/helpers"
 	"github.com/thiduzz/slack-bot/mocks"
@@ -64,8 +65,9 @@ func TestInsertIntoDatabaseWhenCreatingGroup(t *testing.T) {
 
 
 func TestListGroupsFromDatabase(t *testing.T) {
-
+	godotenv.Load("../.env")
 	requestBody := helpers.GenerateBaseRequest()
+	requestBody["trigger_id"] = "123123123"
 	body := helpers.EncodeToBase64URL(requestBody)
 	groupRepositoryMock := &mocks.GroupRepository{}
 	var groups []repositories.GroupListItem
@@ -78,10 +80,10 @@ func TestListGroupsFromDatabase(t *testing.T) {
 
 
 	groupRepositoryMock.On("IndexByContextReference", fmt.Sprintf("%s:%s", requestBody["team_id"], requestBody["channel_id"])).Return(groups, nil).Once()
-	filesystem := os.DirFS("../functions/group")
+	slack := NewSlackService(os.Getenv("SLACK_ACCESS_TOKEN"))
 	service := GroupService{
 		GroupRepository: groupRepositoryMock,
-		fs: filesystem,
+		slack: slack,
 	}
 	r := events.APIGatewayProxyRequest{
 		Body: body,

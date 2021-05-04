@@ -27,10 +27,12 @@ package:
     - '!./**'
     - ./bin/**
 functions:
-  slackInteractivePayloadTransform:
-    handler: bin/transform
-  groupCreate:
-    handler: bin/groupCreate
+  proxy:
+    handler: bin/proxy
+    events:
+      - httpApi:
+          path: /actions
+          method: post
   groupDestroy:
     handler: bin/groupDestroy
   groupList:
@@ -39,45 +41,6 @@ functions:
       - httpApi:
           path: /groups
           method: post
-stepFunctions:
-  stateMachines:
-    yourChoiceMachine:
-      type: EXPRESS
-      events:
-        - http:
-            path: /states
-            method: post
-      definition:
-        StartAt: TransformState
-        States:
-          TransformState:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [slackInteractivePayloadTransform, Arn]
-            Next: ChoiceState
-          ChoiceState:
-            Type: Choice
-            Choices:
-              - Variable: "$.action"
-                StringEquals: "createGroup"
-                Next: GroupCreateMatchState
-              - Variable: "$.action"
-                StringEquals: "destroyGroup"
-                Next: GroupDestroyMatchState
-            Default: DefaultState
-          GroupCreateMatchState:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [groupCreate, Arn]
-            End: true
-          GroupDestroyMatchState:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [groupDestroy, Arn]
-            End: true
-          DefaultState:
-            Type: Fail
-            Cause: "No Matches!"
 resources:
   Resources:
     WorkspacesTable:
@@ -149,6 +112,7 @@ plugins:
   - serverless-offline
   - serverless-step-functions
   - serverless-finch
+  - serverless-dotenv-plugin
 custom:
   client:
     bucketName: sorting-hats-frontend

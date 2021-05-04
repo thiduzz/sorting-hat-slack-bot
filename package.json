@@ -7,7 +7,9 @@
     "serverless-offline": "^6.9.0"
   },
   "devDependencies": {
+    "serverless-dotenv-plugin": "^3.9.0",
     "serverless-dynamodb-local": "^0.2.39",
+    "serverless-middleware": "0.0.14",
     "serverless-step-functions": "^2.30.0"
   }
 }

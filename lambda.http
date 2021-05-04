@@ -5,3 +5,11 @@ Content-Type: application/json
 
 ###
 
+POST https://slack.com/api/views.open
+Content-Type: application/json;charset=UTF-8
+Accept: application/json
+Authorization: Bearer {{slacktoken}}
+
+{
+  "trigger_id": 123123123
+}
