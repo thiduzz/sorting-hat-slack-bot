@@ -24,3 +24,4 @@ vendor
 node_modules
 .env
 http-client.env.json
+.env
