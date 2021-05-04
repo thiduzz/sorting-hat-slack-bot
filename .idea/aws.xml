@@ -14,7 +14,4 @@
       </list>
     </option>
   </component>
-  <component name="lambda">
-    <option name="showAllHandlerGutterIcons" value="true" />
-  </component>
 </project>

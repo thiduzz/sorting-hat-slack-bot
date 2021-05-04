@@ -22,3 +22,6 @@ vendor
 .dynamodb
 .dynamodb/*
 node_modules
+.env
+http-client.env.json
+.env

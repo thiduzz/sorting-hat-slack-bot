@@ -9,19 +9,18 @@ import (
 	"github.com/thiduzz/slack-bot/helpers"
 	"github.com/thiduzz/slack-bot/models"
 	"github.com/thiduzz/slack-bot/repositories"
-	"io/fs"
 	"time"
 )
 
 type GroupService struct {
 	repositories.GroupRepository
-	fs fs.FS
+	slack *SlackService
 }
 
-func NewGroupService(db *dynamodb.DynamoDB, filesystem fs.FS) *GroupService {
+func NewGroupService(db *dynamodb.DynamoDB, slackService *SlackService) *GroupService {
 	return &GroupService{
 		GroupRepository: repositories.NewGroupRepository(db),
-		fs: filesystem,
+		slack: slackService,
 	}
 }
 
@@ -32,15 +31,16 @@ func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGa
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	groups, err := g.GroupRepository.IndexByContextReference(fmt.Sprintf("%s:%s", formRequest["workspaceId"],formRequest["channelId"]))
+	referenceId := fmt.Sprintf("%s:%s", formRequest["workspaceId"],formRequest["channelId"])
+	groups, err := g.GroupRepository.IndexByContextReference(referenceId)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	formattedResponse, err := helpers.FormatListBlockResponse(g.fs, groups)
+	err = g.slack.showGroupsListDialog(params.Get("trigger_id"), referenceId, groups)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	return events.APIGatewayProxyResponse{Body: formattedResponse, StatusCode: 200,
+	return events.APIGatewayProxyResponse{Body: "", StatusCode: 200,
 		Headers: map[string]string{
 			"Content-Type":           "application/json",
 		}}, nil

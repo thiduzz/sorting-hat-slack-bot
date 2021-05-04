@@ -1,0 +1,135 @@
+org: thizaom
+app: sorting-hat
+service: api
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  region: eu-central-1
+  runtime: go1.x
+  lambdaHashingVersion: 20201221
+  tracing:
+    apiGateway: true
+    lambda: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:*:*:*"
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+functions:
+  proxy:
+    handler: bin/proxy
+    events:
+      - httpApi:
+          path: /actions
+          method: post
+  groupDestroy:
+    handler: bin/groupDestroy
+  groupList:
+    handler: bin/groupIndex
+    events:
+      - httpApi:
+          path: /groups
+          method: post
+resources:
+  Resources:
+    WorkspacesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SortingHatWorkspace
+        AttributeDefinitions:
+          - AttributeName: Workspace
+            AttributeType: S
+        KeySchema:
+          - AttributeName: Workspace
+            KeyType: HASH
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    ContextsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SortingHatContexts
+        AttributeDefinitions:
+          - AttributeName: WorkspaceChannel
+            AttributeType: S
+        KeySchema:
+          - AttributeName: WorkspaceChannel
+            KeyType: HASH
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    GroupsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SortingHatGroups
+        AttributeDefinitions:
+          - AttributeName: GroupId
+            AttributeType: S
+          - AttributeName: ContextReference
+            AttributeType: S
+        KeySchema:
+          - AttributeName: GroupId
+            KeyType: HASH
+          - AttributeName: ContextReference
+            KeyType: RANGE
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    TasksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: SortingHatSortedTasks
+        AttributeDefinitions:
+          - AttributeName: GroupId
+            AttributeType: S
+          - AttributeName: BroadcastedAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: GroupId
+            KeyType: HASH
+          - AttributeName: BroadcastedAt
+            KeyType: RANGE
+        BillingMode: PROVISIONED
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-step-functions
+  - serverless-finch
+  - serverless-dotenv-plugin
+custom:
+  client:
+    bucketName: sorting-hats-frontend
+    distributionFolder: /frontend/dist
+  endpoints:
+    dynamodb-url: 'http://localhost:8000'
+  dynamodb:
+    # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+    # Uncomment only if you already have a DynamoDB running locally
+    # noStart: true

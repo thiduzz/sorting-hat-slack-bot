@@ -1,74 +1,93 @@
 {
-	"blocks": [
-		{
-			"type": "divider"
-		},
-		{{ $length := len . }}
-		{{ if eq $length 0 }}
-			{
-				"type": "section",
-				"text": {
-					"type": "mrkdwn",
-					"text": "No current groups"
-				}
-			},
-		{{ else }}
-			{{ range . }}
-				{
-				"type": "section",
-				"text": {
-						"type": "mrkdwn",
-						"text": "{{ .Title}}"
-				},
-				"accessory":
-					{
-						"type": "overflow",
-						"options": [
-							{
-								"value": "manage-{{ .GroupId }}",
-								"text": {
-										"type": "plain_text",
-										"text": "Manage",
-										"emoji": true
-								}
-							},
-							{
-								"value": "inactivate-{{ .GroupId }}",
-								"text": {
-									"type": "plain_text",
-									"text": "Inactivate",
-									"emoji": true
-								}
-							},
-							{
-								"value": "delete-{{ .GroupId }}",
-								"text": {
-								"type": "plain_text",
-								"text": "Delete",
-								"emoji": true
-								}
-							}
-						],
-						"action_id": "overflow-action"
-					}
-				},
-			{{end}}
-		{{ end }}
-		{
-			"type": "divider"
-		},
-		{
-			"dispatch_action": true,
-			"type": "input",
-			"element": {
-				"type": "plain_text_input",
-				"action_id": "new_group_title-action"
-			},
-			"label": {
-				"type": "plain_text",
-				"text": "Create new group",
-				"emoji": true
-			}
-		}
-	]
+    "trigger_id": "{{ .triggerId }}"
+    "view": {
+        "type": "modal",
+        "title": {
+            "type": "plain_text",
+            "text": "Manage Groups",
+            "emoji": true
+        },
+        "submit": {
+            "type": "plain_text",
+            "text": "Submit",
+            "emoji": true
+        },
+        "close": {
+            "type": "plain_text",
+            "text": "Cancel",
+            "emoji": true
+        },
+        "blocks": [
+            {
+                "type": "divider"
+            },
+            {{ $length := len .groups }}
+            {{ if eq $length 0 }}
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "No current groups"
+                    }
+                },
+            {{ else }}
+                {{ range .groups }}
+                    {
+                    "type": "section",
+                    "text": {
+                            "type": "mrkdwn",
+                            "text": "{{ .Title}}"
+                    },
+                    "accessory":
+                        {
+                            "type": "overflow",
+                            "options": [
+                                {
+                                    "value": "manage-{{ .GroupId }}",
+                                    "text": {
+                                            "type": "plain_text",
+                                            "text": "Manage",
+                                            "emoji": true
+                                    }
+                                },
+                                {
+                                    "value": "inactivate-{{ .GroupId }}",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "Inactivate",
+                                        "emoji": true
+                                    }
+                                },
+                                {
+                                    "value": "delete-{{ .GroupId }}",
+                                    "text": {
+                                    "type": "plain_text",
+                                    "text": "Delete",
+                                    "emoji": true
+                                    }
+                                }
+                            ],
+                            "action_id": "overflow-action"
+                        }
+                    },
+                {{end}}
+            {{ end }}
+            {
+                "type": "divider"
+            },
+            {
+                "dispatch_action": true,
+                "type": "input",
+                "element": {
+                    "type": "plain_text_input",
+                    "action_id": "new_group_title-action"
+                },
+                "label": {
+                    "type": "plain_text",
+                    "text": "Create new group",
+                    "emoji": true
+                }
+            }
+        ]
+    }
 }
