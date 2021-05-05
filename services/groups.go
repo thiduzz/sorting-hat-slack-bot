@@ -1,12 +1,14 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/google/uuid"
 	"github.com/thiduzz/slack-bot/helpers"
+	"github.com/thiduzz/slack-bot/middlewares"
 	"github.com/thiduzz/slack-bot/models"
 	"github.com/thiduzz/slack-bot/repositories"
 	"time"
@@ -46,7 +48,7 @@ func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGa
 		}}, nil
 }
 
-func (g GroupService) Store(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func (g GroupService) Store(ctx context.Context, request *middlewares.Request) (events.APIGatewayProxyResponse, error) {
 	params := helpers.DecodeRequest(request.Body)
 	group := models.Group{
 		GroupId:     uuid.NewString(),

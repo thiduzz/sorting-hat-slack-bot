@@ -1,23 +1,27 @@
 package helpers
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/thiduzz/slack-bot/models"
 	"net/url"
 )
 
-func EncodeToBase64URL(request map[string]string) string {
+func EncodeToBase64URL(request map[string]interface{}) string {
 
 	params := url.Values{}
 	for key, value := range request {
-		params.Add(key, value)
+		params.Add(key, fmt.Sprintf("%s",value))
 	}
 	query := params.Encode()
 	return base64.StdEncoding.EncodeToString([]byte(query))
 }
 
-func GenerateBaseRequest() map[string]string {
-	return map[string]string{
+func GenerateBaseRequest() map[string]interface{} {
+	return map[string]interface{}{
 		"token":        "O8mkcDKXfmIitPp7RXSX4S1U",
 		"team_id":      "T01T72BF15Z",
 		"team_domain":  "test",
@@ -42,4 +46,18 @@ func GenerateBaseGroup() models.Group {
 		CreatorId:   "U01T02LM6DU",
 		CreatedAt:   "",
 	}
+}
+
+func GenerateBase64Payload(req map[string]string) string {
+	values, _ := url.ParseQuery("")
+	reqBodyBytes := new(bytes.Buffer)
+	json.NewEncoder(reqBodyBytes).Encode(req)
+	values.Add("payload", reqBodyBytes.String())
+	return base64.StdEncoding.EncodeToString([]byte(values.Encode()))
+}
+
+func ConvertRequestToByteSlice(request events.APIGatewayProxyRequest) []byte{
+	reqBodyBytes := new(bytes.Buffer)
+	json.NewEncoder(reqBodyBytes).Encode(request)
+	return reqBodyBytes.Bytes()
 }
