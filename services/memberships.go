@@ -1,12 +1,12 @@
 package services
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
+	"errors"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/thiduzz/slack-bot/helpers"
+	"github.com/thiduzz/slack-bot/models"
 	"github.com/thiduzz/slack-bot/repositories"
-	"text/template"
 )
 
 type MembershipService struct {
@@ -14,9 +14,8 @@ type MembershipService struct {
 	repositories.GroupRepository
 }
 
-func (g MembershipService) Create(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	params := helpers.DecodeRequest(request.Body)
-	title := params.Get("text")
+func (g MembershipService) Store(ctx context.Context, req *models.Request) (events.APIGatewayProxyResponse, error) {
+/*	title := params.Get("text")
 	channel := params.Get("channel_id")
 	group, err := g.GroupRepository.FindByNameAndChannel(title, channel)
 	if err != nil {
@@ -39,5 +38,6 @@ func (g MembershipService) Create(request events.APIGatewayProxyRequest) (events
 		StatusCode:      200,
 		Headers: map[string]string{
 			"Content-Type": "application/json",
-		}}, nil
+		}}, nil*/
+	return helpers.NewErrorResponse(errors.New("implement")), nil
 }

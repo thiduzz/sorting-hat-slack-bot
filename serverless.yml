@@ -28,7 +28,7 @@ package:
     - ./bin/**
 functions:
   proxy:
-    handler: bin/proxy
+    handler: bin/slack/interactivity/actions
     events:
       - httpApi:
           path: /actions
@@ -36,7 +36,7 @@ functions:
   groupDestroy:
     handler: bin/groupDestroy
   groupList:
-    handler: bin/groupIndex
+    handler: bin/slack/slash/hats
     events:
       - httpApi:
           path: /groups

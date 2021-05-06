@@ -28,8 +28,8 @@ func ParseRequest(h ParseRequestHandler) HandlerFunc {
 		}
 		request.DecodedBody = decodedBody
 		request.TriggerId = decodedBody.TriggerId
-		if decodedBody.View.CallbackID != ""{
-			callbackSlice := strings.Split(decodedBody.View.CallbackID,".")
+		if decodedBody.View.CallbackId != ""{
+			callbackSlice := strings.Split(decodedBody.View.CallbackId,".")
 			request.ProxyRoute = &models.ProxyRoute{
 				Entity: callbackSlice[0],
 				Action: callbackSlice[1],

@@ -10,6 +10,7 @@ import (
 	"github.com/thiduzz/slack-bot/helpers"
 	"github.com/thiduzz/slack-bot/middlewares"
 	"github.com/thiduzz/slack-bot/models"
+	"github.com/thiduzz/slack-bot/repositories"
 	"github.com/thiduzz/slack-bot/services"
 	"os"
 )
@@ -32,6 +33,18 @@ func Proxy(ctx context.Context, req *models.Request) (events.APIGatewayProxyResp
 		case "store":
 			return groupService.Store(ctx, req)
 		}
+	case "member":
+		sess := session.Must(session.NewSession())
+		db := dynamodb.New(sess)
+		membershipService := services.MembershipService{
+			MembershipRepository: repositories.NewMembershipRepository(db),
+			GroupRepository:      repositories.NewGroupRepository(db),
+		}
+		switch req.ProxyRoute.Action {
+		case "store":
+			return membershipService.Store(ctx, req)
+		}
+
 	}
 	return helpers.NewErrorResponse(errors.New("not_found")), nil
 }
