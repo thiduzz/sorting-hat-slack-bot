@@ -48,7 +48,7 @@ func GenerateBaseGroup() models.Group {
 	}
 }
 
-func GenerateBase64Payload(req map[string]string) string {
+func GenerateBase64Payload(req map[string]interface{}) string {
 	values, _ := url.ParseQuery("")
 	reqBodyBytes := new(bytes.Buffer)
 	json.NewEncoder(reqBodyBytes).Encode(req)

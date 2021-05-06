@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/google/uuid"
 	"github.com/thiduzz/slack-bot/helpers"
-	"github.com/thiduzz/slack-bot/middlewares"
 	"github.com/thiduzz/slack-bot/models"
 	"github.com/thiduzz/slack-bot/repositories"
 	"time"
@@ -48,15 +47,14 @@ func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGa
 		}}, nil
 }
 
-func (g GroupService) Store(ctx context.Context, request *middlewares.Request) (events.APIGatewayProxyResponse, error) {
-	params := helpers.DecodeRequest(request.Body)
+func (g GroupService) Store(ctx context.Context, req *models.Request) (events.APIGatewayProxyResponse, error) {
 	group := models.Group{
 		GroupId:     uuid.NewString(),
-		ChannelId:   params.Get("channel_id"),
-		ChannelName: params.Get("channel_name"),
-		CreatorId:   params.Get("user_id"),
-		Title:       params.Get("text"),
-		WorkspaceId: params.Get("team_id"),
+		ChannelId:   req.DecodedBody.Team.Id,
+		ChannelName: req.DecodedBody.Team.Domain,
+		CreatorId:   req.DecodedBody.User.Id,
+		Title:       "", //req.DecodedBody.State,
+		WorkspaceId: "", //req.DecodedBody.Private,
 		CreatedAt:   time.Now().UTC().Format(time.RFC3339),
 	}
 	_, err := govalidator.ValidateStruct(group)
