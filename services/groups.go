@@ -25,26 +25,21 @@ func NewGroupService(db *dynamodb.DynamoDB, slackService *SlackService) *GroupSe
 	}
 }
 
-func (g GroupService) Index(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	params := helpers.DecodeRequest(request.Body)
-	formRequest := map[string]interface{}{"channelId": params.Get("channel_id"), "workspaceId": params.Get("team_id")}
-	_, err := govalidator.ValidateMap(formRequest, map[string]interface{}{"channelId": "required,alphanum", "workspaceId": "required,alphanum"})
+func (g GroupService) Index(ctx context.Context, req *models.SlashRequest) (events.APIGatewayProxyResponse, error) {
+	_, err := govalidator.ValidateStruct(req.DecodedBody)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	referenceId := fmt.Sprintf("%s:%s", formRequest["workspaceId"], formRequest["channelId"])
+	referenceId := fmt.Sprintf("%s:%s", req.WorkspaceId, req.ChannelId)
 	groups, err := g.GroupRepository.IndexByContextReference(referenceId)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	err = g.slack.showGroupsListDialog(params.Get("trigger_id"), referenceId, groups)
+	err = g.slack.showGroupsListDialog(req.TriggerId, referenceId, groups)
 	if err != nil {
 		return helpers.NewErrorResponse(err), nil
 	}
-	return events.APIGatewayProxyResponse{Body: "", StatusCode: 200,
-		Headers: map[string]string{
-			"Content-Type": "application/json",
-		}}, nil
+	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
 }
 
 func (g GroupService) Store(ctx context.Context, req *models.Request) (events.APIGatewayProxyResponse, error) {

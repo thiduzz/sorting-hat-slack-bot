@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"github.com/slack-go/slack"
+	"github.com/thiduzz/slack-bot/models"
 	"github.com/thiduzz/slack-bot/repositories"
 	"log"
 )
@@ -30,7 +31,7 @@ func (sl SlackService) showGroupsListDialog(triggerId string, referenceId string
 	modalRequest.Close = slack.NewTextBlockObject("plain_text", "Close", false, false)
 	modalRequest.Submit = slack.NewTextBlockObject("plain_text", "Submit", false, false)
 	modalRequest.PrivateMetadata = referenceId
-	modalRequest.CallbackID = "CreateGroup"
+	modalRequest.CallbackID = models.CALLBACK_GROUP_STORE
 	modalRequest.Blocks = slack.Blocks{
 		BlockSet: []slack.Block{
 			slack.NewDividerBlock(),

@@ -1,6 +1,17 @@
 package models
 
-import "github.com/aws/aws-lambda-go/events"
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"github.com/aws/aws-lambda-go/events"
+	"net/url"
+)
+
+const (
+	CALLBACK_GROUP_STORE = "group.store"
+	CALLBACK_GROUP_DELETE = "group.delete"
+)
 
 type ProxyRoute struct {
 	Entity						string											`json:"proxyEntity,omitempty"`
@@ -15,6 +26,14 @@ type Request struct {
 	TriggerId					string											`json:"triggerId,omitempty"`
 }
 
+type SlashRequest struct {
+	events.APIGatewayProxyRequest
+	DecodedBody                 DecodedSlashBody                          	`json:"decodedBody,omitempty"`
+	ChannelId					string										`json:"channelId,omitempty"`
+	WorkspaceId					string										`json:"workspaceId,omitempty"`
+	TriggerId					string										`json:"triggerId,omitempty"`
+}
+
 type DecodedBody struct {
 	TriggerId	string			`json:"trigger_id,omitempty"`
 	Type		string			`json:"type,omitempty"`
@@ -22,6 +41,12 @@ type DecodedBody struct {
 	Team 		SlackTeam  		`json:"team,omitempty"`
 	User		SlackUser		`json:"user,omitempty"`
 	State		SlackState		`json:"state,omitempty"`
+}
+
+type DecodedSlashBody struct {
+	ChannelId		string		`json:"channel_id,omitempty,required,alphanum"`
+	WorkspaceId		string		`json:"team_id,omitempty,required,alphanum"`
+	TriggerId		string		`json:"trigger_id,omitempty,required"`
 }
 
 type SlackView struct {
@@ -37,9 +62,22 @@ type SlackTeam struct {
 
 type SlackUser struct {
 	Id 			string           `json:"id,omitempty"`
-	Name      string           `json:"name,omitempty"`
-	Username      string           `json:"username,omitempty"`
+	Name      string           		`json:"name,omitempty"`
+	Username      string         `json:"username,omitempty"`
 	TeamId      string           `json:"team_id,omitempty"`
 }
 
 type SlackState struct {}
+
+func NewSlackRequest(payload map[string]interface{}) []byte {
+	values, _ := url.ParseQuery("")
+	reqBodyBytes := new(bytes.Buffer)
+	json.NewEncoder(reqBodyBytes).Encode(payload)
+	values.Add("payload", reqBodyBytes.String())
+	reqBodyBytes = new(bytes.Buffer)
+	json.NewEncoder(reqBodyBytes).Encode(events.APIGatewayProxyRequest{
+		Body:                            base64.StdEncoding.EncodeToString([]byte(values.Encode())),
+		IsBase64Encoded:                 true,
+	})
+	return reqBodyBytes.Bytes()
+}

@@ -1,18 +1,6 @@
 package services
 
-import (
-	"fmt"
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/joho/godotenv"
-	"github.com/stretchr/testify/assert"
-	"github.com/thiduzz/slack-bot/helpers"
-	"github.com/thiduzz/slack-bot/middlewares"
-	"github.com/thiduzz/slack-bot/mocks"
-	"github.com/thiduzz/slack-bot/repositories"
-	"os"
-	"testing"
-)
-
+/**
 
 func TestValidationErrorWhenGroupNameIsTooShort(t *testing.T) {
 	service := GroupService{}
@@ -85,3 +73,4 @@ func TestDeleteFromDatabase(t *testing.T) {
 	service.Destroy(r)
 
 }
+*/
