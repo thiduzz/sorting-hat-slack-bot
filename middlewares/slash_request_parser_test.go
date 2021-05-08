@@ -13,13 +13,13 @@ func TestDecodingOfSlashRequest(t *testing.T) {
 		handlerFunction := MiddlewareFunc(ParseSlashRequest(func(ctx context.Context, request *models.SlashRequest) (events.APIGatewayProxyResponse, error){
 
 			assert.NotNil(t, request)
-			assert.IsType(t, models.DecodedSlashBody{}, request.DecodedBody)
-			assert.Equal(t, "T01T72BF15Z", request.DecodedBody.WorkspaceId)
-			assert.Equal(t, "C01T72BFMFV", request.DecodedBody.ChannelId)
-			assert.Equal(t, "123123123", request.DecodedBody.TriggerId)
+			assert.IsType(t, models.DecodedSlashBody{}, request)
+			assert.Equal(t, "T01T72BF15Z", request.WorkspaceId)
+			assert.Equal(t, "C01T72BFMFV", request.ChannelId)
+			assert.Equal(t, "123123123", request.TriggerId)
 			return events.APIGatewayProxyResponse{}, nil
 		}))
-		handlerFunction(nil, models.NewSlackRequest(map[string]interface{}{
+		handlerFunction(nil, models.NewSlackSlashRequest(map[string]interface{}{
 			"token":        "O8mkcDKXfmIitPp7RXSX4S1U",
 			"team_id":      "T01T72BF15Z",
 			"team_domain":  "test",

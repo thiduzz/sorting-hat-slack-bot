@@ -4,33 +4,35 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/gorilla/schema"
 	"github.com/thiduzz/slack-bot/models"
+	"log"
 	"net/url"
-	"strings"
 )
 
 type ParseSlashRequestHandler func(ctx context.Context, data *models.SlashRequest) (events.APIGatewayProxyResponse, error)
 
 func ParseSlashRequest(h ParseSlashRequestHandler) HandlerFunc {
 	return HandlerFunc(func(ctx context.Context, data json.RawMessage) (interface{}, error) {
-		var request models.SlashRequest
+		log.Println(fmt.Sprintf("Request middleware start"))
+		var request events.APIGatewayProxyRequest
 		err := json.Unmarshal(data, &request)
 		if err != nil{
+			log.Println(fmt.Sprintf("Request middleware 1 error: %s", err.Error()))
 			return nil, err
 		}
 		sDec, _ := base64.StdEncoding.DecodeString(request.Body)
 		params, _ := url.ParseQuery(string(sDec))
-		dec := json.NewDecoder(strings.NewReader(params.Get("payload")))
 		var decodedBody models.DecodedSlashBody
-		if err := dec.Decode(&decodedBody); err != nil {
+		err =  schema.NewDecoder().Decode(&decodedBody, params)
+		if err != nil {
+			log.Println(fmt.Sprintf("Request middleware 1 error: %s", err.Error()))
 			return nil, err
 		}
-		request.DecodedBody = decodedBody
-		request.ChannelId = decodedBody.ChannelId
-		request.WorkspaceId = decodedBody.WorkspaceId
-		request.TriggerId = decodedBody.TriggerId
-		return h(ctx, &request)
+		log.Println(fmt.Sprintf("Request middleware: %v",request))
+		return h(ctx, &models.SlashRequest{APIGatewayProxyRequest: request, DecodedSlashBody: decodedBody})
 	})
 }
 

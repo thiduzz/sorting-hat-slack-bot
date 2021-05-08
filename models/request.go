@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"net/url"
 )
@@ -28,10 +29,7 @@ type Request struct {
 
 type SlashRequest struct {
 	events.APIGatewayProxyRequest
-	DecodedBody                 DecodedSlashBody                          	`json:"decodedBody,omitempty"`
-	ChannelId					string										`json:"channelId,omitempty"`
-	WorkspaceId					string										`json:"workspaceId,omitempty"`
-	TriggerId					string										`json:"triggerId,omitempty"`
+	DecodedSlashBody
 }
 
 type DecodedBody struct {
@@ -44,9 +42,18 @@ type DecodedBody struct {
 }
 
 type DecodedSlashBody struct {
-	ChannelId		string		`json:"channel_id,omitempty,required,alphanum"`
-	WorkspaceId		string		`json:"team_id,omitempty,required,alphanum"`
-	TriggerId		string		`json:"trigger_id,omitempty,required"`
+	ChannelId		string		`schema:"channel_id,omitempty,required,alphanum"`
+	WorkspaceId		string		`schema:"team_id,omitempty,required,alphanum"`
+	TriggerId		string		`schema:"trigger_id,omitempty,required"`
+	UserId 			string   	`schema:"user_id,omitempty,required"`
+	Text 			string   	`schema:"text,omitempty"`
+	Command 		string   	`schema:"command,omitempty"`
+	Token 			string   	`schema:"token,omitempty"`
+	ApiAppId 		string   	`schema:"api_app_id,omitempty"`
+	ChannelName		string   	`schema:"channel_name,omitempty"`
+	UserName		string   	`schema:"user_name,omitempty"`
+	ResponseUrl		string   	`schema:"response_url,omitempty"`
+	TeamDomain		string   	`schema:"team_domain,omitempty"`
 }
 
 type SlackView struct {
@@ -75,6 +82,19 @@ func NewSlackRequest(payload map[string]interface{}) []byte {
 	json.NewEncoder(reqBodyBytes).Encode(payload)
 	values.Add("payload", reqBodyBytes.String())
 	reqBodyBytes = new(bytes.Buffer)
+	json.NewEncoder(reqBodyBytes).Encode(events.APIGatewayProxyRequest{
+		Body:                            base64.StdEncoding.EncodeToString([]byte(values.Encode())),
+		IsBase64Encoded:                 true,
+	})
+	return reqBodyBytes.Bytes()
+}
+
+func NewSlackSlashRequest(payload map[string]interface{}) []byte {
+	values, _ := url.ParseQuery("")
+	for s, i := range payload {
+		values.Add(s, fmt.Sprintf("%s",i))
+	}
+	reqBodyBytes := new(bytes.Buffer)
 	json.NewEncoder(reqBodyBytes).Encode(events.APIGatewayProxyRequest{
 		Body:                            base64.StdEncoding.EncodeToString([]byte(values.Encode())),
 		IsBase64Encoded:                 true,
