@@ -62,10 +62,10 @@ resources:
       Properties:
         TableName: SortingHatContexts
         AttributeDefinitions:
-          - AttributeName: WorkspaceChannel
+          - AttributeName: workspace_channel
             AttributeType: S
         KeySchema:
-          - AttributeName: WorkspaceChannel
+          - AttributeName: workspace_channel
             KeyType: HASH
         BillingMode: PROVISIONED
         ProvisionedThroughput:
@@ -76,14 +76,14 @@ resources:
       Properties:
         TableName: SortingHatGroups
         AttributeDefinitions:
-          - AttributeName: GroupId
+          - AttributeName: group_id
             AttributeType: S
-          - AttributeName: ContextReference
+          - AttributeName: context_reference
             AttributeType: S
         KeySchema:
-          - AttributeName: GroupId
+          - AttributeName: group_id
             KeyType: HASH
-          - AttributeName: ContextReference
+          - AttributeName: context_reference
             KeyType: RANGE
         BillingMode: PROVISIONED
         ProvisionedThroughput:
@@ -94,14 +94,14 @@ resources:
       Properties:
         TableName: SortingHatSortedTasks
         AttributeDefinitions:
-          - AttributeName: GroupId
+          - AttributeName: group_id
             AttributeType: S
-          - AttributeName: BroadcastedAt
+          - AttributeName: broadcasted_at
             AttributeType: S
         KeySchema:
-          - AttributeName: GroupId
+          - AttributeName: group_id
             KeyType: HASH
-          - AttributeName: BroadcastedAt
+          - AttributeName: broadcasted_at
             KeyType: RANGE
         BillingMode: PROVISIONED
         ProvisionedThroughput:

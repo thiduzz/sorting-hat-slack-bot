@@ -55,9 +55,11 @@ type DecodedSlashBody struct {
 }
 
 type SlackView struct {
+	Id				string			 `json:"id,omitempty"`
 	PrivateMetadata string           `json:"private_metadata,omitempty"`
 	CallbackId      string           `json:"callback_id,omitempty"`
 	State		SlackState			 `json:"state,omitempty"`
+	Hash			string			 `json:"hash,omitempty"`
 }
 
 

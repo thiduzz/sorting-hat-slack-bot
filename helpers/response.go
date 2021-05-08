@@ -22,3 +22,21 @@ func NewErrorResponse(err error) events.APIGatewayProxyResponse {
 			"Content-Type": "application/json",
 		}}
 }
+
+
+func NewInteractivityErrorResponse(errors map[string] string) events.APIGatewayProxyResponse {
+	var buf bytes.Buffer
+	body, _ := json.Marshal(map[string]interface{}{
+		"response_action": 	"errors",
+		"errors":          	errors,
+	})
+	json.HTMLEscape(&buf, body)
+	bodyEscaped := buf.String()
+	return events.APIGatewayProxyResponse{
+		Body: bodyEscaped,
+		IsBase64Encoded: false,
+		StatusCode:      200,
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		}}
+}

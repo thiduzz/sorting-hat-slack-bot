@@ -2,9 +2,9 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/slack-go/slack"
 	"github.com/thiduzz/slack-bot/models"
-	"github.com/thiduzz/slack-bot/repositories"
 	"log"
 )
 
@@ -17,39 +17,66 @@ func NewSlackService(accessToken string) *SlackService {
 	return &SlackService{client: client}
 }
 
-func (sl SlackService) showGroupsListDialog(triggerId string, referenceId string, groups []repositories.GroupListItem) error {
+func (sl SlackService) generateGroupListDialog(referenceId string, groups []models.Group) *slack.ModalViewRequest {
 
-	var groupsBlock *slack.SectionBlock
+	var groupsBlock []slack.Block
+	groupsBlock = append(groupsBlock, slack.NewDividerBlock())
 	if len(groups) <= 0 {
-		groupsBlock = slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "No current groups", false, false), nil, nil)
+		groupsBlock = append(groupsBlock, slack.NewSectionBlock(slack.NewTextBlockObject("plain_text", "No current groups", false, false), nil, nil))
 	} else {
-		groupsBlock = slack.NewSectionBlock(slack.NewTextBlockObject("mrkdwn", "With some groups", false, false), nil, nil)
+		for _, group := range groups {
+			groupsBlock = append(groupsBlock,
+				slack.NewSectionBlock(
+					slack.NewTextBlockObject("plain_text", group.Title, false, false),
+					nil,
+					&slack.Accessory{
+						OverflowElement: slack.NewOverflowBlockElement( "selectOptions|"+ group.GroupId,
+							slack.NewOptionBlockObject(
+								"manage",
+								slack.NewTextBlockObject("plain_text", ":gear: Manage", true, false),
+								nil,
+							),
+							slack.NewOptionBlockObject(
+								"delete",
+								slack.NewTextBlockObject("plain_text", ":x: Delete", true, false),
+								nil,
+							),
+						),
+					}),
+			)
+		}
 	}
+
+	groupsBlock = append(groupsBlock, slack.NewDividerBlock())
+
+	groupsBlock = append(groupsBlock,
+		slack.InputBlock{
+			Type:           slack.MBTInput,
+			BlockID:        "inputGroupCreate",
+			Label:          slack.NewTextBlockObject("plain_text", "New group name", false, false),
+			Element:        slack.PlainTextInputBlockElement{
+				Type:        	slack.METPlainTextInput,
+				ActionID:    	"TextInputCreateGroup",
+				Placeholder: 	slack.NewTextBlockObject("plain_text", "Write the name....", false, false),
+				MinLength: 		5,
+				MaxLength: 		25,
+			},
+			Hint:           nil,
+			Optional:       false,
+			DispatchAction: true,
+		})
 	var modalRequest slack.ModalViewRequest
 	modalRequest.Type = slack.ViewType("modal")
 	modalRequest.Title = slack.NewTextBlockObject("plain_text", "Channel Groups", false, false)
 	modalRequest.Close = slack.NewTextBlockObject("plain_text", "Close", false, false)
-	modalRequest.Submit = slack.NewTextBlockObject("plain_text", "Submit", false, false)
+	modalRequest.Submit = nil
 	modalRequest.PrivateMetadata = referenceId
 	modalRequest.CallbackID = models.CALLBACK_GROUP_STORE
 	modalRequest.Blocks = slack.Blocks{
-		BlockSet: []slack.Block{
-			slack.NewDividerBlock(),
-			groupsBlock,
-			slack.NewDividerBlock(),
-			slack.InputBlock{
-				Type:           "input",
-				BlockID:        "inputGroupCreate",
-				Label:          slack.NewTextBlockObject("plain_text", "New group name", false, false),
-				Element:        slack.NewPlainTextInputBlockElement(slack.NewTextBlockObject("plain_text", "Write the name....", false, false), "TextInputCreateGroup"),
-				Hint:           nil,
-				Optional:       false,
-				DispatchAction: true,
-			},
-		},
+		BlockSet: groupsBlock,
 	}
 
-	return sl.showDialog(triggerId, modalRequest)
+	return &modalRequest
 }
 
 func (sl SlackService) showDialog(triggerId string, modal slack.ModalViewRequest) error {
@@ -57,12 +84,32 @@ func (sl SlackService) showDialog(triggerId string, modal slack.ModalViewRequest
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(string(body))
-	log.Println(triggerId)
+	log.Println(fmt.Sprintf("View show request: %v", body))
 
-	_, err = sl.client.OpenView(triggerId, modal)
+	res, err := sl.client.OpenView(triggerId, modal)
 	if err != nil {
+		log.Println("error dialog show:"+err.Error())
+		log.Println(fmt.Sprintf("View show response: %v", res))
 		return err
 	}
+	log.Println(fmt.Sprintf("View show response: %v", res))
+	return nil
+}
+
+
+func (sl SlackService) updateDialog(hashId string, viewId string, modal slack.ModalViewRequest) error {
+	body, err := json.Marshal(modal)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(fmt.Sprintf("View update request: %v", body))
+
+	res, err := sl.client.UpdateView(modal, "", hashId, viewId)
+	if err != nil {
+		log.Println("error dialog update:"+err.Error())
+		log.Println(fmt.Sprintf("View update response: %v", res))
+		return err
+	}
+	log.Println(fmt.Sprintf("View update response: %v", res))
 	return nil
 }

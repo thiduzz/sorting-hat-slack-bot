@@ -27,6 +27,7 @@ func ParseRequest(h ParseRequestHandler) HandlerFunc {
 		if err := dec.Decode(&decodedBody); err != nil {
 			return nil, err
 		}
+
 		if decodedBody.View.CallbackId != ""{
 			callbackSlice := strings.Split(decodedBody.View.CallbackId,".")
 			proxyRoute = &models.ProxyRoute{

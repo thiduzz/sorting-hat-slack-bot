@@ -13,7 +13,7 @@ import (
 
 type GroupRepository interface {
 	Store(group models.Group) error
-	IndexByContextReference(channelId string) ([]GroupListItem, error)
+	IndexByContextReference(channelId string) ([]models.Group, error)
 	FindByNameAndChannel(groupName string, channelId string) (*models.Group, error)
 	Destroy(group *models.Group) error
 }
@@ -36,8 +36,8 @@ type GroupListItem struct {
 }
 
 type GroupOwnershipKey struct {
-	ChannelId string
-	GroupId   string
+	ContextReference 	string
+	GroupId   			string
 }
 
 func (g *groupDynamo) Store(group models.Group) error {
@@ -47,6 +47,7 @@ func (g *groupDynamo) Store(group models.Group) error {
 		return err
 	}
 
+	log.Println(fmt.Sprintf("Storing... : %v",av))
 	input := &dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String(models.GroupsTableName),
@@ -58,12 +59,9 @@ func (g *groupDynamo) Store(group models.Group) error {
 	return nil
 }
 
-func (g *groupDynamo) IndexByContextReference(contextReference string) ([]GroupListItem, error) {
-	filt := expression.Name("ContextReference").Equal(expression.Value(contextReference))
-	expr, err := expression.NewBuilder().WithFilter(filt).Build()
-	if err != nil {
-		log.Fatalf("Got error building expression: %s", err)
-	}
+func (g *groupDynamo) IndexByContextReference(contextReference string) ([]models.Group, error) {
+	filt := expression.Name("context_reference").Equal(expression.Value(contextReference))
+	expr, _ := expression.NewBuilder().WithFilter(filt).Build()
 	result, err := g.db.Scan(&dynamodb.ScanInput{
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
@@ -73,10 +71,10 @@ func (g *groupDynamo) IndexByContextReference(contextReference string) ([]GroupL
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Got error calling GetItem: %s", err))
 	}
-	var groups []GroupListItem
+	var groups []models.Group
 
 	for _, i := range result.Items {
-		item := GroupListItem{}
+		item := models.Group{}
 		err = dynamodbattribute.UnmarshalMap(i, &item)
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("Got error unmarshalling: %s", err))
@@ -96,7 +94,6 @@ func (g *groupDynamo) FindByNameAndChannel(groupName string, channelId string) (
 		TableName:                 aws.String(models.GroupsTableName),
 	})
 	if err != nil {
-		log.Println(fmt.Sprintf("Got error calling Scan: %s", err))
 		return nil, errors.New(fmt.Sprintf("Got error calling Scan: %s", err))
 	}
 	if len(result.Items) < 0 {
@@ -115,8 +112,8 @@ func (g *groupDynamo) FindByNameAndChannel(groupName string, channelId string) (
 func (g *groupDynamo) Destroy(group *models.Group) error {
 
 	key, _ := dynamodbattribute.MarshalMap(GroupOwnershipKey{
-		GroupId:   group.GroupId,
-		ChannelId: group.ChannelId,
+		GroupId:   			group.GroupId,
+		ContextReference: 	group.ContextReference,
 	})
 
 	_, err := g.db.DeleteItem(&dynamodb.DeleteItemInput{

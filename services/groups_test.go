@@ -1,22 +1,60 @@
 package services
 
-/**
+import (
+	"github.com/stretchr/testify/assert"
+	"github.com/thiduzz/slack-bot/models"
+	"testing"
+)
+
+func generateRequest(state *models.SlackState) *models.InteractivityRequest {
+	request := &models.InteractivityRequest{
+		DecodedInteractiveBody: models.DecodedInteractiveBody{
+			TriggerId: "123123",
+			Type:      "view_submission",
+			View:      models.SlackView{
+				PrivateMetadata: "333333:22222",
+				CallbackId:      "group.store",
+				State:           models.SlackState{
+					Values: map[string]models.SlackStateValuesWrapper{
+						"inputGroupCreate": map[string]models.SlackStateValue{"TextInputCreateGroup": {Type: "plain_text", Value: "Group Name Test"}},
+					},
+				},
+			},
+			Team:      models.SlackTeam{
+				Id:     "333333",
+				Domain: "thizaom.com",
+			},
+			User:      models.SlackUser{
+				Id:       "123213",
+				Name:     "Thiago",
+				Username: "thizaom",
+				TeamId:   "333333",
+			},
+		},
+	}
+	if state != nil{
+		request.View.State = *state
+	}
+	return request;
+}
 
 func TestValidationErrorWhenGroupNameIsTooShort(t *testing.T) {
 	service := GroupService{}
-	requestBody := helpers.GenerateBaseRequest()
-	requestBody["text"] = "Test"
-	r := middlewares.Request{
-		DecodedBody: requestBody,
-	}
-	res, err := service.Store(nil, &r)
+	res, err := service.Store(nil, generateRequest(&models.SlackState{
+		Values: map[string]models.SlackStateValuesWrapper{
+			"inputGroupCreate": map[string]models.SlackStateValue{"TextInputCreateGroup": {Type: "plain_text", Value: "Tes"}},
+		},
+	}))
 	// assert for not nil (good when you expect something)
 	if assert.Nil(t, err) {
 
-		assert.JSONEq(t, `{"response_type":"ephemeral","text":"Group name should be at least 5 character long"}`, res.Body)
+		assert.JSONEq(t, `{"response_action":"errors","errors":{"inputGroupCreate":"Group name should be at least 5 character long"}}`, res.Body)
 
 	}
 }
+
+/**
+
 
 func TestInsertIntoDatabaseWhenCreatingGroup(t *testing.T) {
 	service := GroupService{}
