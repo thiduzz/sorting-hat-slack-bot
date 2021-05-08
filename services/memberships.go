@@ -14,7 +14,7 @@ type MembershipService struct {
 	repositories.GroupRepository
 }
 
-func (g MembershipService) Store(ctx context.Context, req *models.Request) (events.APIGatewayProxyResponse, error) {
+func (g MembershipService) Store(ctx context.Context, req *models.InteractivityRequest) (events.APIGatewayProxyResponse, error) {
 /*	title := params.Get("text")
 	channel := params.Get("channel_id")
 	group, err := g.GroupRepository.FindByNameAndChannel(title, channel)

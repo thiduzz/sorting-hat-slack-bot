@@ -29,7 +29,7 @@ func NewGroupService(db *dynamodb.DynamoDB, slackService *SlackService) *GroupSe
 func (g GroupService) Index(ctx context.Context, req *models.SlashRequest) (events.APIGatewayProxyResponse, error) {
 
 	log.Println(fmt.Sprintf("Service 1: %v",req))
-	_, err := govalidator.ValidateMap(req.DecodedBody,  map[string]interface{}{"channelId": "required,alphanum", "workspaceId": "required,alphanum"})
+	_, err := govalidator.ValidateStruct(req)
 	if err != nil {
 		log.Println(fmt.Sprintf("Service Error 1: %v",err.Error()))
 		return helpers.NewErrorResponse(err), nil
@@ -50,21 +50,24 @@ func (g GroupService) Index(ctx context.Context, req *models.SlashRequest) (even
 	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
 }
 
-func (g GroupService) Store(ctx context.Context, req *models.Request) (events.APIGatewayProxyResponse, error) {
+func (g GroupService) Store(ctx context.Context, req *models.InteractivityRequest) (events.APIGatewayProxyResponse, error) {
+	//TODO: add validation of state and other required values
 	group := models.Group{
 		GroupId:     uuid.NewString(),
-		ChannelId:   req.DecodedBody.Team.Id,
-		ChannelName: req.DecodedBody.Team.Domain,
-		CreatorId:   req.DecodedBody.User.Id,
-		Title:       "", //req.DecodedBody.State,
-		WorkspaceId: "", //req.DecodedBody.Private,
+		ChannelId:   req.Team.Id,
+		ChannelName: req.Team.Domain,
+		CreatorId:   req.User.Id,
+		Title:       req.View.State.Values["inputGroupCreate"]["TextInputCreateGroup"].Value,
+		WorkspaceId: req.View.PrivateMetadata,
 		CreatedAt:   time.Now().UTC().Format(time.RFC3339),
 	}
 	_, err := govalidator.ValidateStruct(group)
 	if err != nil {
+		log.Println(fmt.Sprintf("Error validating struct: %s", err.Error()))
 		return helpers.NewErrorResponse(err), nil
 	}
 	if err := g.GroupRepository.Store(group); err != nil {
+		log.Println(fmt.Sprintf("Error Storing: %s", err.Error()))
 		return helpers.NewErrorResponse(err), nil
 	}
 	return events.APIGatewayProxyResponse{Body: fmt.Sprintf("New group %s created!", group.Title), StatusCode: 200}, nil

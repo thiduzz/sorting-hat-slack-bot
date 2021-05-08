@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-type ParseRequestHandler func(ctx context.Context, data *models.Request) (events.APIGatewayProxyResponse, error)
+type ParseRequestHandler func(ctx context.Context, data *models.InteractivityRequest) (events.APIGatewayProxyResponse, error)
 
 func ParseRequest(h ParseRequestHandler) HandlerFunc {
 	return HandlerFunc(func(ctx context.Context, data json.RawMessage) (interface{}, error) {
-		var request models.Request
+		var request events.APIGatewayProxyRequest
 		err := json.Unmarshal(data, &request)
 		if err != nil{
 			return nil, err
@@ -22,22 +22,25 @@ func ParseRequest(h ParseRequestHandler) HandlerFunc {
 		sDec, _ := base64.StdEncoding.DecodeString(request.Body)
 		params, _ := url.ParseQuery(string(sDec))
 		dec := json.NewDecoder(strings.NewReader(params.Get("payload")))
-		var decodedBody models.DecodedBody
+		var decodedBody models.DecodedInteractiveBody
+		var proxyRoute *models.ProxyRoute
 		if err := dec.Decode(&decodedBody); err != nil {
 			return nil, err
 		}
-		request.DecodedBody = decodedBody
-		request.TriggerId = decodedBody.TriggerId
 		if decodedBody.View.CallbackId != ""{
 			callbackSlice := strings.Split(decodedBody.View.CallbackId,".")
-			request.ProxyRoute = &models.ProxyRoute{
+			proxyRoute = &models.ProxyRoute{
 				Entity: callbackSlice[0],
 				Action: callbackSlice[1],
 			}
 		}else{
-			request.ProxyRoute = nil
+			proxyRoute = nil
 		}
-		return h(ctx, &request)
+		return h(ctx, &models.InteractivityRequest{
+			APIGatewayProxyRequest: request,
+			DecodedInteractiveBody: decodedBody,
+			ProxyRoute:             proxyRoute,
+		})
 	})
 }
 

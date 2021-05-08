@@ -23,13 +23,14 @@ func main() {
 	)
 }
 
-func Proxy(ctx context.Context, req *models.Request) (events.APIGatewayProxyResponse, error) {
-	switch req.ProxyRoute.Entity {
+func Proxy(ctx context.Context, req *models.InteractivityRequest) (events.APIGatewayProxyResponse, error) {
+
+	switch req.Entity {
 	case "group":
 		sess := session.Must(session.NewSession())
 		db := dynamodb.New(sess)
 		groupService := services.NewGroupService(db, services.NewSlackService(os.Getenv("SLACK_ACCESS_TOKEN")))
-		switch req.ProxyRoute.Action {
+		switch req.Action {
 		case "store":
 			return groupService.Store(ctx, req)
 		}
@@ -40,7 +41,7 @@ func Proxy(ctx context.Context, req *models.Request) (events.APIGatewayProxyResp
 			MembershipRepository: repositories.NewMembershipRepository(db),
 			GroupRepository:      repositories.NewGroupRepository(db),
 		}
-		switch req.ProxyRoute.Action {
+		switch req.Action {
 		case "store":
 			return membershipService.Store(ctx, req)
 		}

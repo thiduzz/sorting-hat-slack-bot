@@ -13,7 +13,7 @@ func TestDecodingOfSlashRequest(t *testing.T) {
 		handlerFunction := MiddlewareFunc(ParseSlashRequest(func(ctx context.Context, request *models.SlashRequest) (events.APIGatewayProxyResponse, error){
 
 			assert.NotNil(t, request)
-			assert.IsType(t, models.DecodedSlashBody{}, request)
+			assert.IsType(t, &models.SlashRequest{}, request)
 			assert.Equal(t, "T01T72BF15Z", request.WorkspaceId)
 			assert.Equal(t, "C01T72BFMFV", request.ChannelId)
 			assert.Equal(t, "123123123", request.TriggerId)
@@ -32,5 +32,6 @@ func TestDecodingOfSlashRequest(t *testing.T) {
 			"api_app_id":   "TestingAppId",
 			"response_url": "https://hooks.slack.com/command/blablabla",
 			"trigger_id": 	"123123123",
+			"is_enterprise_install":"true",
 		}))
 }
