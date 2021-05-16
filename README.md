@@ -1,23 +1,72 @@
-Run: `make` to generate the binary and then `sam deploy` to deploy
+
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#technical-details">Technical Details</a></li>
+  </ol>
+</details>
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+### Interactions
+
+#### User types "/hats"
+A retrieval is performed to get all the groups available with a "manage" button
+Additionally a button to create a group is displayed
+
+In the backend, retrieve all groups of this context and utilize the Block Kit to generate a nice message:
+*  Click on manage will send the <group-id> to the backend and generate a popup with all the group data (tasks, members,dates...)
+*  Click on add group will trigger a popup form to fill the group requirements
+
+#### User select a user and click add members on the manage dialog amd click save
+A post is performed with all the data of the form and the group_id, in the database an upsert in the groups and tasks table is performed.
+
+## Usage
+
+Run: `make` to generate the binary and then `serverless deploy` to deploy
 
 Run: `yarn build` in the frontend folder and `serverless client deploy` to update the frontend
 
-To generate mocks I am using mockery codegen CLI: 
+To generate mocks I am using mockery codegen CLI:
 
 `mockery --dir ./repositories --name MembershipRepository`
 
-* ~~create group~~
-* ~~list group~~
-* ~~delete group~~
-* create membership
-* list memberships
-* delete membership  
-* create tasks for group
-* delete task
-* set calendar for group tasks
+## Roadmap
 
+See the [open issues](https://github.com/thiduzz/sorting-hat-slack-bot/issues) for a list of proposed features (and known issues).
 
-#Database Design
+## Contributing
+
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Contact
+
+Thiago Mello - [@thizaom](https://twitter.com/thizaom) - thiago.megermello@gmail.com
+
+Project Link: [https://github.com/thiduzz/sorting-hat-slack-bot](https://github.com/thiduzz/sorting-hat-slack-bot)
+
+## Technical Details
+
+###Database Design
 
 * Tables
     *  SortingHatWorkspace
@@ -98,38 +147,26 @@ To generate mocks I am using mockery codegen CLI:
       }
     ```
   
-# Interactions
-
-#### User types "/sorting-hats"
-A retrieval is performed to get all the groups available with a "manage" button
-Additionally a button to create a group is displayed
-
-In the backend, retrieve all groups of this context and utilize the Block Kit to generate a nice message:
-*  Click on manage will send the <group-id> to the backend and generate a popup with all the group data (tasks, members,dates...)
-*  Click on add group will trigger a popup form to fill the group requirements
-
-#### User select a user and click add members on the manage dialog amd click save
-A post is performed with all the data of the form and the group_id, in the database an upsert in the groups and tasks table is performed.
-
+### Slack Interactivity Request
 ```json
 {
   "type": "view_submission",
   "team": {
-    "id": "T01T72BF15Z",
-    "domain": "thiagopersona-ru28436"
+    "id": "Example",
+    "domain": "test-ru28436"
   },
   "user": {
-    "id": "U01T02LM6DU",
-    "username": "thiduzz14",
-    "name": "thiduzz14",
-    "team_id": "T01T72BF15Z"
+    "id": "Example",
+    "username": "exampleuser",
+    "name": "Example User",
+    "team_id": "Example"
   },
-  "api_app_id": "A01T3P94H6H",
-  "token": "O8mkcDKXfmIitPp7RXSX4S1U",
-  "trigger_id": "2040069532737.1925079511203.c298f54601507aa6f682a2bc3cbb689f",
+  "api_app_id": "Example",
+  "token": "TestToken",
+  "trigger_id": "TestTrigger",
   "view": {
-    "id": "V020CL1H007",
-    "team_id": "T01T72BF15Z",
+    "id": "Example",
+    "team_id": "Example",
     "type": "modal",
     "blocks": [
       {
@@ -187,7 +224,7 @@ A post is performed with all the data of the form and the group_id, in the datab
         }
       }
     },
-    "hash": "1620113594.9E7VbXRE",
+    "hash": "Example",
     "title": {
       "type": "plain_text",
       "text": "Channel Groups",
@@ -206,11 +243,11 @@ A post is performed with all the data of the form and the group_id, in the datab
       "emoji": true
     },
     "previous_view_id": null,
-    "root_view_id": "V020CL1H007",
-    "app_id": "A01T3P94H6H",
+    "root_view_id": "Example",
+    "app_id": "Example",
     "external_id": "",
-    "app_installed_team_id": "T01T72BF15Z",
-    "bot_id": "B01TWLT7MA4"
+    "app_installed_team_id": "Example",
+    "bot_id": "Example"
   },
   "response_urls": [],
   "is_enterprise_install": false,
