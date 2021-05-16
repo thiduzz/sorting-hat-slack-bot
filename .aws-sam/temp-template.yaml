@@ -1,9 +1,0 @@
-Resources:
-  Function:
-    Type: AWS::Serverless::Function
-    Properties:
-      Timeout: 300
-      MemorySize: 128
-      Handler: HandleRequest
-      CodeUri: /home/thiago/go/src/github.com/thiduzz/slack-bot
-      Runtime: go1.x
